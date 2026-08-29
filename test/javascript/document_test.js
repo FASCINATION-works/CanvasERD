@@ -158,3 +158,48 @@ test("pans the viewport without changing its zoom", () => {
   assert.deepEqual(transform, [0.75, 0, 0, 0.75, 95, 10]);
   assert.deepEqual(original, [0.75, 0, 0, 0.75, 120, -30]);
 });
+
+test("batches pan deltas into one update per animation frame", () => {
+  const frames = [];
+  const updates = [];
+  const schedulePan = documentModel.createPanScheduler(
+    (deltaX, deltaY) => updates.push([deltaX, deltaY]),
+    (callback) => { frames.push(callback); return frames.length; }
+  );
+
+  schedulePan(4, 7);
+  schedulePan(-1, 5);
+
+  assert.equal(frames.length, 1);
+  assert.deepEqual(updates, []);
+  frames.shift()();
+  assert.deepEqual(updates, [[3, 12]]);
+
+  schedulePan(2, 3);
+  assert.equal(frames.length, 1);
+});
+
+test("reduces Retina quality only until panning becomes idle", () => {
+  const timers = [];
+  const cancelled = [];
+  const retinaChanges = [];
+  const controller = documentModel.createPanQualityController(
+    (enabled) => retinaChanges.push(enabled),
+    {
+      idleDelay: 100,
+      schedule: (callback, delay) => { timers.push({ callback, delay }); return timers.length; },
+      cancel: (timer) => cancelled.push(timer)
+    }
+  );
+
+  controller.begin();
+  controller.begin();
+
+  assert.deepEqual(retinaChanges, [false]);
+  assert.equal(timers.length, 2);
+  assert.deepEqual(cancelled, [1]);
+  assert.equal(timers[1].delay, 100);
+
+  timers[1].callback();
+  assert.deepEqual(retinaChanges, [false, true]);
+});
