@@ -149,3 +149,12 @@ test("fits diagram bounds into the viewport", () => {
 
   assert.deepEqual(transform, [1, 0, 0, 1, 0, -50]);
 });
+
+test("pans the viewport without changing its zoom", () => {
+  const original = [0.75, 0, 0, 0.75, 120, -30];
+
+  const transform = documentModel.panViewport(original, 25, -40);
+
+  assert.deepEqual(transform, [0.75, 0, 0, 0.75, 95, 10]);
+  assert.deepEqual(original, [0.75, 0, 0, 0.75, 120, -30]);
+});

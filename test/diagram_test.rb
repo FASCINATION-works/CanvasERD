@@ -2,6 +2,7 @@
 
 require "active_record"
 require "json"
+require "rails_erd/version"
 require_relative "test_helper"
 
 class DiagramTest < Minitest::Test
@@ -56,6 +57,8 @@ class DiagramTest < Minitest::Test
   end
 
   def test_respects_rails_erd_entity_and_attribute_filters
+    skip "only_attributes requires Rails ERD 2.2" if Gem::Version.new(RailsERD::VERSION) < Gem::Version.new("2.2")
+
     create_author_and_book_models
 
     schema = diagram_for(

@@ -61,12 +61,12 @@ class CLITest < Minitest::Test
     assert_includes err.string, "Rails application environment not found"
   end
 
-  def test_existing_diagram_is_deferred_until_png_support
+  def test_missing_diagram_fails_before_loading_rails
     err = StringIO.new
     status = CanvasERD::CLI.start(["diagram.png"], out: StringIO.new, err: err)
 
     assert_equal 1, status
-    assert_includes err.string, "loading an existing diagram will be implemented with PNG support"
+    assert_includes err.string, "Could not read diagram"
   end
 
   def test_executable_loads_the_gem

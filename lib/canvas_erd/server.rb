@@ -10,16 +10,23 @@ module CanvasERD
       "/" => ["index.html", "text/html; charset=utf-8"],
       "/assets/app.js" => ["app.js", "application/javascript; charset=utf-8"],
       "/assets/document.js" => ["document.js", "application/javascript; charset=utf-8"],
+      "/assets/png.js" => ["png.js", "application/javascript; charset=utf-8"],
       "/assets/styles.css" => ["styles.css", "text/css; charset=utf-8"],
       "/assets/fabric.min.js" => ["vendor/fabric.min.js", "application/javascript; charset=utf-8"]
     }.freeze
 
     attr_reader :schema
 
-    def initialize(schema:, schema_provider: nil)
+    def initialize(schema:, schema_provider: nil, state: nil)
       @schema = schema
       @schema_provider = schema_provider || -> { schema }
       @schema_mutex = Mutex.new
+      @document = {
+        "format" => "canvas_erd",
+        "version" => 1,
+        "schema" => schema,
+        "state" => state
+      }
     end
 
     def call(environment)
@@ -30,6 +37,8 @@ module CanvasERD
         response(405, "text/plain; charset=utf-8", "Method Not Allowed", "allow" => "GET, HEAD")
       elsif path == "/api/schema"
         schema_response(environment, refresh: method == "GET")
+      elsif path == "/api/document"
+        document_response
       elsif STATIC_FILES.key?(path)
         file_response(*STATIC_FILES.fetch(path))
       else
@@ -51,6 +60,16 @@ module CanvasERD
         200,
         "application/json; charset=utf-8",
         JSON.generate(schema),
+        "cache-control" => "no-store"
+      )
+    end
+
+    def document_response
+      document = @document["state"] ? @document : @document.merge("schema" => schema)
+      response(
+        200,
+        "application/json; charset=utf-8",
+        JSON.generate(document),
         "cache-control" => "no-store"
       )
     end

@@ -14,6 +14,7 @@
           <p id="status" aria-live="polite">Loading Rails ERD schema…</p>
         </div>
         <div class="toolbar-actions" aria-label="Canvas controls">
+          <button id="save-diagram" type="button">Save PNG</button>
           <button id="refresh-schema" type="button">Refresh schema</button>
           <button id="add-note" type="button">Add note</button>
           <span class="button-group">
@@ -38,13 +39,14 @@
         <section id="canvas-panel" class="canvas-panel" aria-label="Entity relationship diagram canvas">
           <canvas id="erd-canvas"></canvas>
           <div id="notice" class="notice" aria-live="polite" hidden></div>
-          <div class="canvas-help">Drag tables to arrange · Scroll to zoom · Hold Space and drag to pan</div>
+          <div class="canvas-help">Drag tables to arrange · Two-finger drag to pan · Pinch to zoom</div>
           <div id="loading" class="loading">Building diagram…</div>
         </section>
       </main>
     </div>
     <script src="/assets/fabric.min.js" defer></script>
     <script src="/assets/document.js" defer></script>
+    <script src="/assets/png.js" defer></script>
     <script src="/assets/app.js" defer></script>
   </body>
 </html>

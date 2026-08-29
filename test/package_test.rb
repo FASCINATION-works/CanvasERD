@@ -7,6 +7,7 @@ class PackageTest < Minitest::Test
   ROOT = File.expand_path("..", __dir__)
   FABRIC_ASSET = "lib/canvas_erd/web/vendor/fabric.min.js"
   FABRIC_LICENSE = "licenses/FABRIC-JS-LICENSE.txt"
+  HOMEPAGE = "https://github.com/FASCINATION-works/CanvasERD"
 
   def test_gemspec_packages_the_executable_and_fabric_files
     spec = Gem::Specification.load(File.join(ROOT, "canvas_erd.gemspec"))
@@ -14,7 +15,20 @@ class PackageTest < Minitest::Test
     assert_includes spec.files, "exe/canvas_erd"
     assert_includes spec.files, FABRIC_ASSET
     assert_includes spec.files, FABRIC_LICENSE
+    assert_includes spec.files, "LICENSE"
+    assert_includes spec.files, "CHANGELOG.md"
     assert_equal ["canvas_erd"], spec.executables
+  end
+
+  def test_release_metadata
+    spec = Gem::Specification.load(File.join(ROOT, "canvas_erd.gemspec"))
+
+    assert_equal "MIT", spec.license
+    assert_equal HOMEPAGE, spec.homepage
+    assert_equal HOMEPAGE, spec.metadata.fetch("source_code_uri")
+    assert_equal "#{HOMEPAGE}/blob/main/CHANGELOG.md", spec.metadata.fetch("changelog_uri")
+    assert_equal "#{HOMEPAGE}/issues", spec.metadata.fetch("bug_tracker_uri")
+    assert_equal "true", spec.metadata.fetch("rubygems_mfa_required")
   end
 
   def test_vendored_fabric_asset_matches_version_7_4_0_build
@@ -27,7 +41,7 @@ class PackageTest < Minitest::Test
     spec = Gem::Specification.load(File.join(ROOT, "canvas_erd.gemspec"))
     dependencies = spec.runtime_dependencies.to_h { |dependency| [dependency.name, dependency.requirement.to_s] }
 
-    assert_equal "~> 2.2", dependencies.fetch("rails-erd")
+    assert_equal "~> 2.1", dependencies.fetch("rails-erd")
     assert_equal ">= 2.2, < 4", dependencies.fetch("rack")
     refute dependencies.key?("webrick")
   end

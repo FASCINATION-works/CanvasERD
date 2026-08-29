@@ -34,6 +34,20 @@ class ServerTest < Minitest::Test
     assert_equal "nosniff", response["x-content-type-options"]
   end
 
+  def test_serves_the_initial_editable_document
+    state = { "includedEntityIds" => ["Book"], "positions" => {}, "notes" => [] }
+    response = Rack::MockRequest.new(CanvasERD::WebApplication.new(schema: SCHEMA, state: state)).get("/api/document")
+
+    assert_equal 200, response.status
+    assert_equal({
+      "format" => "canvas_erd",
+      "version" => 1,
+      "schema" => SCHEMA,
+      "state" => state
+    }, JSON.parse(response.body))
+    assert_equal "no-store", response["cache-control"]
+  end
+
   def test_refreshes_and_caches_the_schema_when_requested
     refreshed_schema = SCHEMA.merge("entities" => [{ "id" => "Author" }])
     provider_calls = 0
@@ -45,6 +59,7 @@ class ServerTest < Minitest::Test
 
     assert_equal refreshed_schema, JSON.parse(request.get("/api/schema?refresh=1").body)
     assert_equal refreshed_schema, JSON.parse(request.get("/api/schema").body)
+    assert_equal refreshed_schema, JSON.parse(request.get("/api/document").body).fetch("schema")
     assert_equal 1, provider_calls
   end
 
@@ -60,6 +75,7 @@ class ServerTest < Minitest::Test
   def test_serves_only_known_static_assets
     javascript = @request.get("/assets/app.js")
     document_model = @request.get("/assets/document.js")
+    png_model = @request.get("/assets/png.js")
     fabric = @request.get("/assets/fabric.min.js")
     missing = @request.get("/assets/../server.rb")
 
@@ -68,6 +84,8 @@ class ServerTest < Minitest::Test
     assert_equal "no-store", javascript["cache-control"]
     assert_equal 200, document_model.status
     assert_includes document_model.body, "CanvasERDDocument"
+    assert_equal 200, png_model.status
+    assert_includes png_model.body, "CanvasERDPng"
     assert_equal 200, fabric.status
     assert_includes fabric.body, "e.fabric={}"
     assert_equal 404, missing.status

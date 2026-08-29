@@ -35,7 +35,7 @@ module CanvasERD
       @err.puts "Error: #{error.message}"
       @err.puts parser
       1
-    rescue Error, ApplicationLoader::Error, Server::Error => error
+    rescue Error, ApplicationLoader::Error, PngDocument::Error, Server::Error => error
       @err.puts "Error: #{error.message}"
       1
     rescue StandardError => error
@@ -57,16 +57,22 @@ module CanvasERD
 
     def run(options)
       if options.diagram_path
-        raise Error, "loading an existing diagram will be implemented with PNG support"
+        @err.puts "Loading CanvasERD diagram from #{options.diagram_path}..."
+        document = PngDocument.load(File.expand_path(options.diagram_path, @root))
       end
 
       @err.puts "Loading Rails application from #{@root}..."
       ApplicationLoader.new(@root).load
 
-      @err.puts "Generating Rails ERD schema..."
       schema_provider = SchemaProvider.new
-      schema = schema_provider.call
-      app = WebApplication.new(schema: schema, schema_provider: schema_provider)
+      if document
+        schema = document.fetch("schema")
+        state = document.fetch("state")
+      else
+        @err.puts "Generating Rails ERD schema..."
+        schema = schema_provider.call
+      end
+      app = WebApplication.new(schema: schema, schema_provider: schema_provider, state: state)
       server = Server.new(app: app)
 
       @out.puts "CanvasERD is running at #{server.url}"
