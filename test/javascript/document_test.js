@@ -17,6 +17,13 @@ test("uses explicit top-left origins for card geometry", () => {
   );
 });
 
+test("renders table text without a glyph-clipping object cache", () => {
+  assert.deepEqual(
+    documentModel.tableText({ top: 12, objectCaching: true }),
+    { originX: "left", originY: "top", top: 12, objectCaching: false }
+  );
+});
+
 test("lays entities out deterministically without overlap", () => {
   const positions = documentModel.layoutEntities(entities, { columns: 2, margin: 20, gapX: 40, gapY: 30 });
 
@@ -157,6 +164,19 @@ test("pans the viewport without changing its zoom", () => {
 
   assert.deepEqual(transform, [0.75, 0, 0, 0.75, 95, 10]);
   assert.deepEqual(original, [0.75, 0, 0, 0.75, 120, -30]);
+});
+
+test("applies responsive pinch zoom within the canvas limits", () => {
+  assert.ok(Math.abs(documentModel.zoomForWheel(1, 10) - 0.9048) < 0.0001);
+  assert.ok(Math.abs(documentModel.zoomForWheel(1, -10) - 1.1052) < 0.0001);
+  assert.equal(documentModel.zoomForWheel(0.15, 100), 0.15);
+  assert.equal(documentModel.zoomForWheel(2.5, -100), 2.5);
+});
+
+test("avoids table caching at high effective Retina zoom", () => {
+  assert.equal(documentModel.shouldCacheTable(1, 2), true);
+  assert.equal(documentModel.shouldCacheTable(1.6, 2), false);
+  assert.equal(documentModel.shouldCacheTable(2.5, 1), true);
 });
 
 test("batches pan deltas into one update per animation frame", () => {
