@@ -36,11 +36,15 @@ class ServerTest < Minitest::Test
 
   def test_serves_only_known_static_assets
     javascript = @request.get("/assets/app.js")
+    document_model = @request.get("/assets/document.js")
     fabric = @request.get("/assets/fabric.min.js")
     missing = @request.get("/assets/../server.rb")
 
     assert_equal 200, javascript.status
     assert_includes javascript["content-type"], "application/javascript"
+    assert_equal "no-store", javascript["cache-control"]
+    assert_equal 200, document_model.status
+    assert_includes document_model.body, "CanvasERDDocument"
     assert_equal 200, fabric.status
     assert_includes fabric.body, "e.fabric={}"
     assert_equal 404, missing.status

@@ -9,6 +9,7 @@ module CanvasERD
     STATIC_FILES = {
       "/" => ["index.html", "text/html; charset=utf-8"],
       "/assets/app.js" => ["app.js", "application/javascript; charset=utf-8"],
+      "/assets/document.js" => ["document.js", "application/javascript; charset=utf-8"],
       "/assets/styles.css" => ["styles.css", "text/css; charset=utf-8"],
       "/assets/fabric.min.js" => ["vendor/fabric.min.js", "application/javascript; charset=utf-8"]
     }.freeze
@@ -49,7 +50,12 @@ module CanvasERD
     end
 
     def file_response(relative_path, content_type)
-      response(200, content_type, File.binread(File.join(WEB_ROOT, relative_path)))
+      response(
+        200,
+        content_type,
+        File.binread(File.join(WEB_ROOT, relative_path)),
+        "cache-control" => "no-store"
+      )
     end
 
     def response(status, content_type, body, headers = {})

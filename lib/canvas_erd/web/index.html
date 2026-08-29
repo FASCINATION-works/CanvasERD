@@ -7,11 +7,42 @@
     <link rel="stylesheet" href="/assets/styles.css">
   </head>
   <body>
-    <main>
-      <h1>CanvasERD</h1>
-      <p id="status">Loading Rails ERD schema…</p>
-      <p>The interactive canvas will be added in the next phase.</p>
-    </main>
+    <div class="app-shell">
+      <header class="toolbar">
+        <div class="brand">
+          <h1>CanvasERD</h1>
+          <p id="status" aria-live="polite">Loading Rails ERD schema…</p>
+        </div>
+        <div class="toolbar-actions" aria-label="Canvas controls">
+          <button id="add-note" type="button">Add note</button>
+          <span class="button-group">
+            <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+            <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+          </span>
+          <button id="reset-view" type="button">Fit diagram</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="sidebar" aria-label="Diagram tables">
+          <label class="search-label" for="table-search">Tables</label>
+          <input id="table-search" type="search" placeholder="Filter tables…" autocomplete="off">
+          <div class="selection-actions">
+            <button id="select-all" type="button">Select all</button>
+            <button id="select-none" type="button">Clear</button>
+          </div>
+          <div id="table-list" class="table-list"></div>
+        </aside>
+
+        <section id="canvas-panel" class="canvas-panel" aria-label="Entity relationship diagram canvas">
+          <canvas id="erd-canvas"></canvas>
+          <div class="canvas-help">Drag tables to arrange · Scroll to zoom · Hold Space and drag to pan</div>
+          <div id="loading" class="loading">Building diagram…</div>
+        </section>
+      </main>
+    </div>
+    <script src="/assets/fabric.min.js" defer></script>
+    <script src="/assets/document.js" defer></script>
     <script src="/assets/app.js" defer></script>
   </body>
 </html>

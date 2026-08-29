@@ -2,7 +2,7 @@
 
 CanvasERD is a companion gem for editing diagrams generated from Rails ERD domain models in a local browser.
 
-The interactive canvas is not implemented yet. The gem currently provides the local server, Rails ERD domain adapter, and the vendored Fabric.js browser asset needed by the editor phase.
+The editor renders Rails models and relationships on an interactive Fabric.js canvas.
 
 ## Local server
 
@@ -15,6 +15,14 @@ bundle exec canvas_erd
 CanvasERD loads and eager-loads the Rails application, generates the schema, starts on a loopback-only address, and opens the editor shell in the default browser. Pass `--no-open` to print the URL without opening it.
 
 CanvasERD uses Rackup with a server handler already present in the Rails bundle, normally Puma. It does not install a separate web server. Loading existing PNG diagrams will be added with PNG support.
+
+## Editor controls
+
+- Drag tables to reposition them.
+- Use the table sidebar to add or remove tables without losing their positions.
+- Scroll over the canvas or use the toolbar buttons to zoom.
+- Hold Space and drag to pan, or use **Fit diagram** to reset the view.
+- Add editable notes with **Add note**. Select a note and press Delete to remove it.
 
 ## Domain adapter
 
