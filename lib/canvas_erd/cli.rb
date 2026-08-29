@@ -4,15 +4,18 @@ require "optparse"
 
 module CanvasERD
   class CLI
+    class Error < StandardError; end
+
     Options = Struct.new(:action, :diagram_path, :open_browser, keyword_init: true)
 
     def self.start(arguments = ARGV, out: $stdout, err: $stderr)
       new(out: out, err: err).start(arguments)
     end
 
-    def initialize(out: $stdout, err: $stderr)
+    def initialize(out: $stdout, err: $stderr, root: Dir.pwd)
       @out = out
       @err = err
+      @root = root
     end
 
     def start(arguments)
@@ -26,12 +29,17 @@ module CanvasERD
         @out.puts "CanvasERD #{CanvasERD::VERSION}"
         0
       else
-        @err.puts "CanvasERD's editor server has not been implemented yet."
-        1
+        run(options)
       end
     rescue OptionParser::ParseError => error
       @err.puts "Error: #{error.message}"
       @err.puts parser
+      1
+    rescue Error, ApplicationLoader::Error, Server::Error => error
+      @err.puts "Error: #{error.message}"
+      1
+    rescue StandardError => error
+      @err.puts "Failed: #{error.class}: #{error.message}"
       1
     end
 
@@ -46,6 +54,28 @@ module CanvasERD
     end
 
     private
+
+    def run(options)
+      if options.diagram_path
+        raise Error, "loading an existing diagram will be implemented with PNG support"
+      end
+
+      @err.puts "Loading Rails application from #{@root}..."
+      ApplicationLoader.new(@root).load
+
+      @err.puts "Generating Rails ERD schema..."
+      schema = CanvasERD::Diagram.create
+      app = WebApplication.new(schema: schema)
+      server = Server.new(app: app)
+
+      @out.puts "CanvasERD is running at #{server.url}"
+      unless !options.open_browser || Browser.open(server.url)
+        @err.puts "Could not open a browser. Visit #{server.url} manually."
+      end
+
+      server.start
+      0
+    end
 
     def parser(action_setter: ->(_value) {}, open_setter: ->(_value) {})
       OptionParser.new do |options|
@@ -66,4 +96,3 @@ module CanvasERD
     end
   end
 end
-

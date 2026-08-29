@@ -53,12 +53,20 @@ class CLITest < Minitest::Test
     assert_includes err.string, "invalid option: --unknown"
   end
 
-  def test_run_reports_that_the_server_is_not_available_yet
+  def test_run_requires_a_rails_application
     err = StringIO.new
     status = CanvasERD::CLI.start([], out: StringIO.new, err: err)
 
     assert_equal 1, status
-    assert_includes err.string, "editor server has not been implemented yet"
+    assert_includes err.string, "Rails application environment not found"
+  end
+
+  def test_existing_diagram_is_deferred_until_png_support
+    err = StringIO.new
+    status = CanvasERD::CLI.start(["diagram.png"], out: StringIO.new, err: err)
+
+    assert_equal 1, status
+    assert_includes err.string, "loading an existing diagram will be implemented with PNG support"
   end
 
   def test_executable_loads_the_gem

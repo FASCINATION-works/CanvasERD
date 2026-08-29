@@ -28,6 +28,7 @@ class PackageTest < Minitest::Test
     dependencies = spec.runtime_dependencies.to_h { |dependency| [dependency.name, dependency.requirement.to_s] }
 
     assert_equal "~> 2.2", dependencies.fetch("rails-erd")
-    assert_equal "~> 1.9", dependencies.fetch("webrick")
+    assert_equal ">= 2.2, < 4", dependencies.fetch("rack")
+    refute dependencies.key?("webrick")
   end
 end

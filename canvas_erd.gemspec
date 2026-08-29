@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.add_dependency "rails-erd", "~> 2.2"
-  spec.add_dependency "webrick", "~> 1.9"
+  spec.add_dependency "rack", ">= 2.2", "< 4"
 
   spec.add_development_dependency "minitest", "~> 5.20"
   spec.add_development_dependency "rake", "~> 13.0"
