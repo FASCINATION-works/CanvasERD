@@ -23,6 +23,9 @@ CanvasERD uses Rackup with a server handler already present in the Rails bundle,
 - Scroll over the canvas or use the toolbar buttons to zoom.
 - Hold Space and drag to pan, or use **Fit diagram** to reset the view.
 - Add editable notes with **Add note**. Select a note and press Delete to remove it.
+- Use **Refresh schema** after a database migration to update columns and relationships. Existing table positions, selections, notes, and the current view are preserved; new tables start unselected.
+
+CanvasERD refreshes the model classes already loaded by the server. Restart CanvasERD after adding or renaming model classes or changing model code.
 
 ## Domain adapter
 

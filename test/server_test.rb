@@ -34,6 +34,29 @@ class ServerTest < Minitest::Test
     assert_equal "nosniff", response["x-content-type-options"]
   end
 
+  def test_refreshes_and_caches_the_schema_when_requested
+    refreshed_schema = SCHEMA.merge("entities" => [{ "id" => "Author" }])
+    provider_calls = 0
+    app = CanvasERD::WebApplication.new(
+      schema: SCHEMA,
+      schema_provider: -> { provider_calls += 1; refreshed_schema }
+    )
+    request = Rack::MockRequest.new(app)
+
+    assert_equal refreshed_schema, JSON.parse(request.get("/api/schema?refresh=1").body)
+    assert_equal refreshed_schema, JSON.parse(request.get("/api/schema").body)
+    assert_equal 1, provider_calls
+  end
+
+  def test_head_does_not_refresh_the_schema
+    provider_calls = 0
+    app = CanvasERD::WebApplication.new(schema: SCHEMA, schema_provider: -> { provider_calls += 1; SCHEMA })
+
+    Rack::MockRequest.new(app).request("HEAD", "/api/schema?refresh=1")
+
+    assert_equal 0, provider_calls
+  end
+
   def test_serves_only_known_static_assets
     javascript = @request.get("/assets/app.js")
     document_model = @request.get("/assets/document.js")

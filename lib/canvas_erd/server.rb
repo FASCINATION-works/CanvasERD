@@ -16,8 +16,10 @@ module CanvasERD
 
     attr_reader :schema
 
-    def initialize(schema:)
+    def initialize(schema:, schema_provider: nil)
       @schema = schema
+      @schema_provider = schema_provider || -> { schema }
+      @schema_mutex = Mutex.new
     end
 
     def call(environment)
@@ -27,7 +29,7 @@ module CanvasERD
       status, headers, body = if !%w[GET HEAD].include?(method)
         response(405, "text/plain; charset=utf-8", "Method Not Allowed", "allow" => "GET, HEAD")
       elsif path == "/api/schema"
-        schema_response
+        schema_response(environment, refresh: method == "GET")
       elsif STATIC_FILES.key?(path)
         file_response(*STATIC_FILES.fetch(path))
       else
@@ -40,7 +42,11 @@ module CanvasERD
 
     private
 
-    def schema_response
+    def schema_response(environment, refresh:)
+      if refresh && environment.fetch("QUERY_STRING", "").split("&").include?("refresh=1")
+        @schema_mutex.synchronize { @schema = @schema_provider.call }
+      end
+
       response(
         200,
         "application/json; charset=utf-8",

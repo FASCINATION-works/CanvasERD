@@ -37,6 +37,84 @@ test("removing and restoring an entity preserves its position", () => {
   assert.equal(restored.positions, original.positions);
 });
 
+test("reconciles schema changes without losing diagram edits", () => {
+  const previousSchema = {
+    entities: [
+      { id: "Author", attributes: [{ name: "name" }] },
+      { id: "Book", attributes: [{ name: "title" }] }
+    ],
+    relationships: [{ id: "author-books" }],
+    specializations: []
+  };
+  const nextSchema = {
+    entities: [
+      { id: "Author", attributes: [{ name: "full_name" }] },
+      { id: "Review", attributes: [] }
+    ],
+    relationships: [{ id: "author-reviews" }],
+    specializations: []
+  };
+  const state = {
+    includedEntityIds: ["Author", "Book"],
+    positions: { Author: { x: 800, y: 400 }, Book: { x: 20, y: 30 } },
+    notes: [{ id: "note-1", text: "Keep me", x: 5, y: 6, width: 200 }]
+  };
+
+  const result = documentModel.reconcileState(state, previousSchema, nextSchema);
+
+  assert.deepEqual(result.state.includedEntityIds, ["Author"]);
+  assert.deepEqual(result.state.positions.Author, { x: 800, y: 400 });
+  assert.deepEqual(result.state.positions.Book, { x: 20, y: 30 });
+  assert.ok(result.state.positions.Review.y > 400 + documentModel.tableHeight(nextSchema.entities[0]));
+  assert.deepEqual(result.state.notes, state.notes);
+  assert.notEqual(result.state.notes, state.notes);
+  assert.deepEqual(result.changes.entities, {
+    added: ["Review"],
+    removed: ["Book"],
+    updated: ["Author"]
+  });
+  assert.deepEqual(result.changes.relationships, {
+    added: ["author-reviews"],
+    removed: ["author-books"],
+    updated: []
+  });
+});
+
+test("keeps a saved position when a removed entity reappears", () => {
+  const previousSchema = { entities: [], relationships: [], specializations: [] };
+  const nextSchema = { entities: [{ id: "Book", attributes: [] }], relationships: [], specializations: [] };
+  const state = {
+    includedEntityIds: [],
+    positions: { Book: { x: 12, y: 34 } },
+    notes: []
+  };
+
+  const result = documentModel.reconcileState(state, previousSchema, nextSchema);
+
+  assert.deepEqual(result.state.positions.Book, { x: 12, y: 34 });
+  assert.deepEqual(result.state.includedEntityIds, []);
+});
+
+test("summarizes schema changes", () => {
+  const summary = documentModel.changeSummary({
+    entities: { added: ["Book"], updated: ["Author"], removed: [] },
+    relationships: { added: ["author-books"], updated: [], removed: [] },
+    specializations: { added: [], updated: [], removed: [] }
+  });
+
+  assert.equal(summary, "Schema refreshed: 1 added, 1 updated, 1 relationship change.");
+});
+
+test("names removed tables in the schema summary", () => {
+  const summary = documentModel.changeSummary({
+    entities: { added: [], updated: [], removed: ["Book", "Review"] },
+    relationships: { added: [], updated: [], removed: [] },
+    specializations: { added: [], updated: [], removed: [] }
+  });
+
+  assert.equal(summary, "Schema refreshed: 2 removed (Book, Review).");
+});
+
 test("shows relationships only when both tables are included", () => {
   const schema = {
     entities,

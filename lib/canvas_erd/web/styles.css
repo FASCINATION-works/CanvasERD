@@ -37,6 +37,11 @@ button:hover {
   background: #f8fafc;
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 button:focus-visible,
 input:focus-visible {
   outline: 2px solid #2563eb;
@@ -214,6 +219,27 @@ input:focus-visible {
   padding: 0.35rem 0.55rem;
   font-size: 0.7rem;
   pointer-events: none;
+}
+
+.notice {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  z-index: 1;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.45rem;
+  color: #1e3a5f;
+  background: #eff6ff;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.78rem;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1);
+}
+
+.notice.error {
+  color: #991b1b;
+  border-color: #fecaca;
+  background: #fff7f7;
 }
 
 .loading {

@@ -64,8 +64,9 @@ module CanvasERD
       ApplicationLoader.new(@root).load
 
       @err.puts "Generating Rails ERD schema..."
-      schema = CanvasERD::Diagram.create
-      app = WebApplication.new(schema: schema)
+      schema_provider = SchemaProvider.new
+      schema = schema_provider.call
+      app = WebApplication.new(schema: schema, schema_provider: schema_provider)
       server = Server.new(app: app)
 
       @out.puts "CanvasERD is running at #{server.url}"
