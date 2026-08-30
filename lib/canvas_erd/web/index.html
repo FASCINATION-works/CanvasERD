@@ -14,7 +14,11 @@
           <p id="status" aria-live="polite">Loading Rails ERD schema…</p>
         </div>
         <div class="toolbar-actions" aria-label="Canvas controls">
-          <button id="save-diagram" type="button">Save PNG</button>
+          <select id="saved-diagrams" aria-label="Saved diagrams">
+            <option value="">Saved diagrams…</option>
+          </select>
+          <button id="load-diagram" type="button">Load</button>
+          <button id="save-diagram" type="button">Save</button>
           <button id="refresh-schema" type="button">Refresh schema</button>
           <button id="add-note" type="button">Add note</button>
           <span class="button-group">

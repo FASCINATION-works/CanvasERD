@@ -6,7 +6,7 @@ module CanvasERD
   class CLI
     class Error < StandardError; end
 
-    Options = Struct.new(:action, :diagram_path, :open_browser, keyword_init: true)
+    Options = Struct.new(:action, :diagram_path, :diagrams_directory, :open_browser, keyword_init: true)
 
     def self.start(arguments = ARGV, out: $stdout, err: $stderr)
       new(out: out, err: err).start(arguments)
@@ -35,7 +35,7 @@ module CanvasERD
       @err.puts "Error: #{error.message}"
       @err.puts parser
       1
-    rescue Error, ApplicationLoader::Error, PngDocument::Error, Server::Error => error
+    rescue Error, ApplicationLoader::Error, DiagramStore::Error, PngDocument::Error, Server::Error => error
       @err.puts "Error: #{error.message}"
       1
     rescue StandardError => error
@@ -45,12 +45,22 @@ module CanvasERD
 
     def parse(arguments)
       action = :run
+      diagrams_directory = DiagramStore::DEFAULT_DIRECTORY
       open_browser = true
-      remaining = parser(action_setter: ->(value) { action = value }, open_setter: ->(value) { open_browser = value }).parse(arguments.dup)
+      remaining = parser(
+        action_setter: ->(value) { action = value },
+        directory_setter: ->(value) { diagrams_directory = value },
+        open_setter: ->(value) { open_browser = value }
+      ).parse(arguments.dup)
 
       raise OptionParser::ParseError, "expected at most one diagram path" if remaining.length > 1
 
-      Options.new(action: action, diagram_path: remaining.first, open_browser: open_browser)
+      Options.new(
+        action: action,
+        diagram_path: remaining.first,
+        diagrams_directory: diagrams_directory,
+        open_browser: open_browser
+      )
     end
 
     private
@@ -72,7 +82,13 @@ module CanvasERD
         @err.puts "Generating Rails ERD schema..."
         schema = schema_provider.call
       end
-      app = WebApplication.new(schema: schema, schema_provider: schema_provider, state: state)
+      diagram_store = DiagramStore.new(root: @root, directory: options.diagrams_directory)
+      app = WebApplication.new(
+        schema: schema,
+        schema_provider: schema_provider,
+        state: state,
+        diagram_store: diagram_store
+      )
       server = Server.new(app: app)
 
       @out.puts "CanvasERD is running at #{server.url}"
@@ -84,12 +100,16 @@ module CanvasERD
       0
     end
 
-    def parser(action_setter: ->(_value) {}, open_setter: ->(_value) {})
+    def parser(action_setter: ->(_value) {}, directory_setter: ->(_value) {}, open_setter: ->(_value) {})
       OptionParser.new do |options|
         options.banner = "Usage: canvas_erd [options] [diagram.png]"
 
         options.on("--no-open", "Do not open the editor in a browser") do
           open_setter.call(false)
+        end
+
+        options.on("--diagrams-dir DIRECTORY", "Store diagrams here (default: docs/erd)") do |directory|
+          directory_setter.call(directory)
         end
 
         options.on("-v", "--version", "Print the CanvasERD version") do

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "json"
+require "rack/utils"
 require "socket"
 
 module CanvasERD
@@ -17,9 +18,10 @@ module CanvasERD
 
     attr_reader :schema
 
-    def initialize(schema:, schema_provider: nil, state: nil)
+    def initialize(schema:, schema_provider: nil, state: nil, diagram_store: nil)
       @schema = schema
       @schema_provider = schema_provider || -> { schema }
+      @diagram_store = diagram_store
       @schema_mutex = Mutex.new
       @document = {
         "format" => "canvas_erd",
@@ -33,23 +35,45 @@ module CanvasERD
       method = environment.fetch("REQUEST_METHOD")
       path = environment.fetch("PATH_INFO")
 
-      status, headers, body = if !%w[GET HEAD].include?(method)
-        response(405, "text/plain; charset=utf-8", "Method Not Allowed", "allow" => "GET, HEAD")
-      elsif path == "/api/schema"
+      status, headers, body = route(method, path, environment)
+
+      body = [] if method == "HEAD"
+      [status, security_headers.merge(headers), body]
+    rescue DiagramStore::NotFound => error
+      status, headers, body = response(404, "text/plain; charset=utf-8", error.message)
+      [status, security_headers.merge(headers), method == "HEAD" ? [] : body]
+    rescue DiagramStore::Error => error
+      status, headers, body = response(400, "text/plain; charset=utf-8", error.message)
+      [status, security_headers.merge(headers), method == "HEAD" ? [] : body]
+    end
+
+    private
+
+    def route(method, path, environment)
+      if path == "/api/diagram"
+        return method_not_allowed("GET, HEAD, PUT") unless %w[GET HEAD PUT].include?(method)
+
+        return diagram_response(environment, write: method == "PUT")
+      end
+
+      return method_not_allowed("GET, HEAD") unless %w[GET HEAD].include?(method)
+
+      if path == "/api/schema"
         schema_response(environment, refresh: method == "GET")
       elsif path == "/api/document"
         document_response
+      elsif path == "/api/diagrams"
+        diagrams_response
       elsif STATIC_FILES.key?(path)
         file_response(*STATIC_FILES.fetch(path))
       else
         response(404, "text/plain; charset=utf-8", "Not Found")
       end
-
-      body = [] if method == "HEAD"
-      [status, security_headers.merge(headers), body]
     end
 
-    private
+    def method_not_allowed(allow)
+      response(405, "text/plain; charset=utf-8", "Method Not Allowed", "allow" => allow)
+    end
 
     def schema_response(environment, refresh:)
       if refresh && environment.fetch("QUERY_STRING", "").split("&").include?("refresh=1")
@@ -72,6 +96,35 @@ module CanvasERD
         JSON.generate(document),
         "cache-control" => "no-store"
       )
+    end
+
+    def diagrams_response
+      return response(404, "text/plain; charset=utf-8", "Diagram storage is not configured") unless @diagram_store
+
+      response(
+        200,
+        "application/json; charset=utf-8",
+        JSON.generate("directory" => @diagram_store.relative_directory, "diagrams" => @diagram_store.names),
+        "cache-control" => "no-store"
+      )
+    end
+
+    def diagram_response(environment, write:)
+      return response(404, "text/plain; charset=utf-8", "Diagram storage is not configured") unless @diagram_store
+
+      name = Rack::Utils.parse_query(environment.fetch("QUERY_STRING", ""))["name"]
+      if write
+        bytes = environment.fetch("rack.input").read.b
+        @diagram_store.write(name, bytes)
+        response(200, "application/json; charset=utf-8", JSON.generate("name" => name))
+      else
+        response(
+          200,
+          "image/png",
+          @diagram_store.read(name),
+          "cache-control" => "no-store"
+        )
+      end
     end
 
     def file_response(relative_path, content_type)

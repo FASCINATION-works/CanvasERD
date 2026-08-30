@@ -18,7 +18,8 @@ body,
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -43,9 +44,20 @@ button:disabled {
 }
 
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
+}
+
+#saved-diagrams {
+  max-width: 12rem;
+  min-height: 2.25rem;
+  border: 1px solid #cbd3df;
+  border-radius: 0.45rem;
+  color: #263447;
+  background: #ffffff;
+  padding: 0.35rem 0.5rem;
 }
 
 .app-shell {

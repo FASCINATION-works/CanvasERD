@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "rack/mock"
+require "tmpdir"
+require "zlib"
 require_relative "test_helper"
 
 class ServerTest < Minitest::Test
@@ -98,6 +100,38 @@ class ServerTest < Minitest::Test
     assert_empty response.body
   end
 
+  def test_saves_lists_and_loads_diagrams_from_the_application
+    Dir.mktmpdir do |root|
+      store = CanvasERD::DiagramStore.new(root: root)
+      request = Rack::MockRequest.new(CanvasERD::WebApplication.new(schema: SCHEMA, diagram_store: store))
+      png = editable_png
+
+      saved = request.put("/api/diagram?name=domain.erd.png", input: png)
+      listed = request.get("/api/diagrams")
+      loaded = request.get("/api/diagram?name=domain.erd.png")
+
+      assert_equal 200, saved.status
+      assert_equal({ "name" => "domain.erd.png" }, JSON.parse(saved.body))
+      assert_equal({ "directory" => "docs/erd", "diagrams" => ["domain.erd.png"] }, JSON.parse(listed.body))
+      assert_equal 200, loaded.status
+      assert_equal "image/png", loaded["content-type"]
+      assert_equal png, loaded.body
+    end
+  end
+
+  def test_rejects_an_invalid_diagram_filename
+    Dir.mktmpdir do |root|
+      store = CanvasERD::DiagramStore.new(root: root)
+      request = Rack::MockRequest.new(CanvasERD::WebApplication.new(schema: SCHEMA, diagram_store: store))
+
+      response = request.put("/api/diagram?name=domain.png", input: editable_png)
+
+      assert_equal 400, response.status
+      assert_includes response.body, ".erd.png"
+      assert_includes response["content-security-policy"], "default-src 'self'"
+    end
+  end
+
   def test_rejects_mutating_methods
     response = @request.post("/api/schema")
 
@@ -124,5 +158,24 @@ class ServerTest < Minitest::Test
     assert_equal 4567, runner.options.fetch(:Port)
     assert_equal "none", runner.options.fetch(:environment)
     assert_equal "http://127.0.0.1:4567/", server.url
+  end
+
+  private
+
+  def editable_png
+    document = {
+      "format" => "canvas_erd",
+      "version" => 1,
+      "schema" => SCHEMA,
+      "state" => { "includedEntityIds" => ["Book"], "positions" => {}, "notes" => [] }
+    }
+    CanvasERD::PngDocument::SIGNATURE +
+      chunk("iTXt", CanvasERD::PngDocument::ITXT_PREFIX + JSON.generate(document)) +
+      chunk("IEND", "")
+  end
+
+  def chunk(type, data)
+    data = data.b
+    [data.bytesize].pack("N") + type + data + [Zlib.crc32(type + data)].pack("N")
   end
 end

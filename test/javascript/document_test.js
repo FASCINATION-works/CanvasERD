@@ -4,6 +4,10 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const documentModel = require("../../lib/canvas_erd/web/document.js");
 
+test("uses a concrete canvas font for stable Fabric text measurement", () => {
+  assert.equal(documentModel.CANVAS_FONT_FAMILY, "Arial");
+});
+
 const entities = [
   { id: "Book", attributes: [{}, {}] },
   { id: "Author", attributes: [{}] },
@@ -17,11 +21,25 @@ test("uses explicit top-left origins for card geometry", () => {
   );
 });
 
-test("renders table text without a glyph-clipping object cache", () => {
+test("renders canvas text without a glyph-clipping object cache", () => {
   assert.deepEqual(
-    documentModel.tableText({ top: 12, objectCaching: true }),
+    documentModel.uncachedText({ top: 12, objectCaching: true }),
     { originX: "left", originY: "top", top: 12, objectCaching: false }
   );
+});
+
+test("expands a note background around its text", () => {
+  assert.deepEqual(
+    documentModel.paddedBackgroundBounds(220, 40, 12),
+    { left: -122, top: -32, width: 244, height: 64 }
+  );
+});
+
+test("uses the editable diagram filename extension", () => {
+  assert.equal(documentModel.erdFilename("domain"), "domain.erd.png");
+  assert.equal(documentModel.erdFilename("domain.png"), "domain.erd.png");
+  assert.equal(documentModel.erdFilename("domain.erd.png"), "domain.erd.png");
+  assert.equal(documentModel.erdFilename(""), "diagram.erd.png");
 });
 
 test("lays entities out deterministically without overlap", () => {
@@ -42,6 +60,19 @@ test("removing and restoring an entity preserves its position", () => {
   assert.equal(removed.includedEntityIds.includes("Book"), false);
   assert.equal(restored.includedEntityIds.includes("Book"), true);
   assert.equal(restored.positions, original.positions);
+});
+
+test("finds tables in single and multiple selections", () => {
+  const book = { canvasErdType: "entity", entityId: "Book", getObjects: () => [{ canvasErdType: "text" }] };
+  const author = { canvasErdType: "entity", entityId: "Author" };
+  const note = { canvasErdType: "note" };
+
+  assert.deepEqual(documentModel.selectedEntityIds(book), ["Book"]);
+  assert.deepEqual(
+    documentModel.selectedEntityIds({ getObjects: () => [book, note, author] }),
+    ["Book", "Author"]
+  );
+  assert.deepEqual(documentModel.selectedEntityIds(note), []);
 });
 
 test("reconciles schema changes without losing diagram edits", () => {

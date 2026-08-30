@@ -28,11 +28,13 @@ CanvasERD loads and eager-loads the Rails application, generates the schema, sta
 
 CanvasERD uses Rackup with a server handler already present in the Rails bundle, normally Puma. It does not install a separate web server.
 
-To reopen an editable CanvasERD PNG, pass it to the command:
+Diagrams are saved by the editor as `*.erd.png` files under `docs/erd/` in the Rails application. Use a different directory inside the application with `--diagrams-dir`, for example:
 
 ```sh
-bundle exec canvas_erd path/to/domain.png
+bundle exec canvas_erd --diagrams-dir db/diagrams
 ```
+
+The editor's saved-diagram menu loads these files directly. You can also open a diagram when starting CanvasERD with `bundle exec canvas_erd path/to/domain.erd.png`.
 
 ## Editor controls
 
@@ -42,10 +44,10 @@ bundle exec canvas_erd path/to/domain.png
 - Use a two-finger trackpad gesture to pan. Space-drag remains available as a keyboard fallback, and **Fit diagram** resets the view.
 - Add editable notes with **Add note**. Select a note and press Delete to remove it.
 - Use **Refresh schema** after a database migration to update columns and relationships. Existing table positions, selections, notes, and the current view are preserved; new tables start unselected.
-- Use **Save PNG** to download the complete diagram as a normal PNG with its editable schema, layout, notes, selection, and viewport embedded inside it.
+- Use **Save** to write the complete diagram into the Rails application as a normal `*.erd.png` image with its editable schema, layout, notes, selection, and viewport embedded inside it. Use the saved-diagram menu and **Load** to reopen it.
 
 CanvasERD refreshes the model classes already loaded by the server. Restart CanvasERD after adding or renaming model classes or changing model code.
-Keep the original downloaded PNG when you need to edit it again; image optimization tools may remove its CanvasERD metadata.
+Image optimization tools may remove the CanvasERD metadata required to edit a diagram again.
 
 The editor binds only to `127.0.0.1` and does not expose the Rails application over the network.
 

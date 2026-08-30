@@ -11,6 +11,7 @@ class CLITest < Minitest::Test
 
     assert_equal :run, options.action
     assert_nil options.diagram_path
+    assert_equal "docs/erd", options.diagrams_directory
     assert options.open_browser
   end
 
@@ -19,6 +20,12 @@ class CLITest < Minitest::Test
 
     assert_equal "docs/domain.png", options.diagram_path
     refute options.open_browser
+  end
+
+  def test_parse_accepts_a_diagram_directory
+    options = CanvasERD::CLI.new.parse(["--diagrams-dir", "db/diagrams"])
+
+    assert_equal "db/diagrams", options.diagrams_directory
   end
 
   def test_parse_rejects_multiple_diagrams
