@@ -42,6 +42,48 @@ test("uses the editable diagram filename extension", () => {
   assert.equal(documentModel.erdFilename(""), "diagram.erd.png");
 });
 
+test("derives an editable diagram name from a saved filename", () => {
+  assert.equal(documentModel.diagramName("Domain model.erd.png"), "Domain model");
+  assert.equal(documentModel.diagramName("Domain model.png"), "Domain model");
+  assert.equal(documentModel.diagramName(""), "Untitled ERD");
+});
+
+test("confirms before discarding unsaved changes", () => {
+  let confirmations = 0;
+  const confirmDiscard = () => { confirmations += 1; return false; };
+
+  assert.equal(documentModel.confirmDiscardChanges(false, confirmDiscard), true);
+  assert.equal(confirmations, 0);
+  assert.equal(documentModel.confirmDiscardChanges(true, confirmDiscard), false);
+  assert.equal(confirmations, 1);
+});
+
+test("recognizes the platform save shortcuts", () => {
+  assert.equal(documentModel.isSaveShortcut({ key: "s", metaKey: true, ctrlKey: false }), true);
+  assert.equal(documentModel.isSaveShortcut({ key: "S", metaKey: false, ctrlKey: true }), true);
+  assert.equal(documentModel.isSaveShortcut({ key: "s", metaKey: false, ctrlKey: false }), false);
+});
+
+test("selects only the diagram that is actually loaded", () => {
+  const diagrams = ["Domain.erd.png"];
+
+  assert.equal(documentModel.selectedDiagramFilename(null, diagrams), "");
+  assert.equal(documentModel.selectedDiagramFilename("Domain.erd.png", diagrams), "Domain.erd.png");
+});
+
+test("tracks whether the diagram has unsaved changes", () => {
+  const changes = [];
+  const tracker = documentModel.createChangeTracker((dirty) => changes.push(dirty));
+
+  assert.equal(tracker.isDirty(), false);
+  tracker.markDirty();
+  tracker.markDirty();
+  assert.equal(tracker.isDirty(), true);
+  tracker.markClean();
+  assert.equal(tracker.isDirty(), false);
+  assert.deepEqual(changes, [true, false]);
+});
+
 test("lays entities out deterministically without overlap", () => {
   const positions = documentModel.layoutEntities(entities, { columns: 2, margin: 20, gapX: 40, gapY: 30 });
 

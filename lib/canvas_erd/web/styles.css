@@ -9,6 +9,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html,
 body,
 .app-shell {
@@ -39,7 +43,7 @@ button:hover {
 }
 
 button:disabled {
-  cursor: wait;
+  cursor: default;
   opacity: 0.65;
 }
 
@@ -50,14 +54,26 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
+#diagram-name,
 #saved-diagrams {
-  max-width: 12rem;
   min-height: 2.25rem;
   border: 1px solid #cbd3df;
   border-radius: 0.45rem;
   color: #263447;
   background: #ffffff;
   padding: 0.35rem 0.5rem;
+}
+
+#diagram-name {
+  width: 18rem;
+  max-width: 40vw;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+#saved-diagrams {
+  width: 12rem;
+  max-width: 20vw;
 }
 
 .app-shell {
@@ -78,18 +94,27 @@ select:focus-visible {
   box-shadow: 0 1px 5px rgba(15, 23, 42, 0.06);
 }
 
-.brand {
+.diagram-identity {
   min-width: 0;
 }
 
-.brand h1 {
+.diagram-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.diagram-name-row h1 {
   margin: 0;
+  overflow: hidden;
   color: #172554;
   font-size: 1.15rem;
   letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.brand p {
+.diagram-identity p {
   margin: 0.2rem 0 0;
   overflow: hidden;
   color: #66758a;
@@ -100,10 +125,40 @@ select:focus-visible {
 
 .toolbar-actions,
 .button-group,
-.selection-actions {
+.selection-actions,
+.sidebar-heading,
+.canvas-footer,
+.canvas-controls {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.icon-button {
+  width: 2.35rem;
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+.icon-button svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.icon-button.compact,
+.icon-button.name-edit {
+  width: 1.9rem;
+  min-height: 1.9rem;
+}
+
+.icon-button.name-edit {
+  border-color: transparent;
+  background: transparent;
 }
 
 .button-group {
@@ -142,8 +197,12 @@ select:focus-visible {
   padding: 1rem;
 }
 
-.search-label {
+.sidebar-heading {
+  justify-content: space-between;
   margin-bottom: 0.45rem;
+}
+
+.search-label {
   color: #334155;
   font-size: 0.75rem;
   font-weight: 700;
@@ -220,17 +279,25 @@ select:focus-visible {
   inset: 0;
 }
 
-.canvas-help {
+.canvas-footer {
   position: absolute;
+  left: 0.75rem;
   right: 0.75rem;
   bottom: 0.75rem;
-  border: 1px solid rgba(203, 213, 225, 0.9);
-  border-radius: 0.4rem;
+  z-index: 1;
+  justify-content: space-between;
+}
+
+.canvas-brand {
   color: #64748b;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 0.35rem 0.55rem;
-  font-size: 0.7rem;
-  pointer-events: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.canvas-brand:hover {
+  color: #243b63;
+  text-decoration: underline;
 }
 
 .notice {

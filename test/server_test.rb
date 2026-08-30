@@ -23,7 +23,20 @@ class ServerTest < Minitest::Test
 
     assert_equal 200, response.status
     assert_includes response["content-type"], "text/html"
-    assert_includes response.body, "<h1>CanvasERD</h1>"
+    assert_includes response.body, '<h1 id="diagram-name-display">Untitled ERD</h1>'
+    assert_includes response.body, 'id="diagram-name"'
+    assert_includes response.body, 'id="edit-diagram-name"'
+    assert_includes response.body, 'id="open-diagram"'
+    assert_includes response.body, 'id="new-diagram"'
+    assert_includes response.body, 'id="save-diagram"'
+    assert_match(/<button id="save-diagram"[^>]* disabled>/, response.body)
+    assert_match(/<select id="saved-diagrams"[^>]* hidden>/, response.body)
+    assert_includes response.body, 'aria-label="Refresh schema"'
+    assert_includes response.body, '<option value="" selected>Untitled ERD</option>'
+    assert_includes response.body, 'href="https://github.com/FASCINATION-works/CanvasERD"'
+    assert_includes response.body, '<svg '
+    refute_includes response.body, "Drag tables to arrange"
+    refute_includes response.body, 'id="load-diagram"'
   end
 
   def test_serves_the_schema_as_json_without_caching
@@ -91,6 +104,7 @@ class ServerTest < Minitest::Test
     assert_equal 200, fabric.status
     assert_includes fabric.body, "e.fabric={}"
     assert_equal 404, missing.status
+    assert_match(/\.canvas-footer \{[^}]*right: 0\.75rem;/m, @request.get("/assets/styles.css").body)
   end
 
   def test_supports_head_requests
