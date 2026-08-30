@@ -69,6 +69,10 @@ test("maps editor keyboard shortcuts to actions", () => {
   assert.equal(documentModel.shortcutAction({ key: "n", ctrlKey: true }), "new");
   assert.equal(documentModel.shortcutAction({ key: "n" }), "addNote");
   assert.equal(documentModel.shortcutAction({ key: "t" }), "toggleTables");
+  assert.equal(documentModel.shortcutAction({ key: "+" }), "zoomIn");
+  assert.equal(documentModel.shortcutAction({ key: "=" }), "zoomIn");
+  assert.equal(documentModel.shortcutAction({ key: "-" }), "zoomOut");
+  assert.equal(documentModel.shortcutAction({ key: "0" }), "fit");
   assert.equal(documentModel.shortcutAction({ key: "?", shiftKey: true }), "help");
   assert.equal(documentModel.shortcutAction({ key: "n", altKey: true }), null);
 });

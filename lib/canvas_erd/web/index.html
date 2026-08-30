@@ -24,34 +24,27 @@
               <p id="status" aria-live="polite">Loading Rails ERD schema…</p>
             </div>
             <div class="toolbar-actions" aria-label="Diagram controls">
-              <button id="new-diagram" class="icon-button" type="button" aria-label="New diagram" title="New diagram">
+              <button id="new-diagram" class="icon-button" type="button" aria-label="New diagram" title="New diagram (⌘/Ctrl-N)">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16h16V8Z"/><path d="M14 2v6h6M12 12v6M9 15h6"/></svg>
               </button>
-              <button id="open-diagram" class="icon-button" type="button" aria-label="Open diagram" title="Open diagram" aria-expanded="false">
+              <button id="open-diagram" class="icon-button" type="button" aria-label="Open diagram" title="Open diagram (⌘/Ctrl-O)" aria-expanded="false">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 7h5l2 2h11l-2 10H5Z"/><path d="M3 7v12h2"/></svg>
               </button>
               <select id="saved-diagrams" aria-label="Saved diagrams" hidden>
                 <option value="" selected>Untitled ERD</option>
               </select>
-              <button id="save-diagram" class="icon-button" type="button" aria-label="Save diagram" title="Save diagram" disabled>
+              <button id="save-diagram" class="icon-button" type="button" aria-label="Save diagram" title="Save diagram (⌘/Ctrl-S)" disabled>
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3h12l3 3v15H4V4a1 1 0 0 1 1-1Z"/><path d="M8 3v6h8V3M8 21v-8h8v8"/></svg>
               </button>
             </div>
           </div>
 
-          <button id="add-note" class="icon-button floating-add-note" type="button" aria-label="Add note" title="Add note">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3h14v13l-5 5H5Z"/><path d="M14 21v-5h5M12 7v6M9 10h6"/></svg>
-          </button>
-
-          <aside id="tables-sidebar" class="sidebar" aria-label="Diagram tables">
+          <aside id="tables-sidebar" class="sidebar collapsed" aria-label="Diagram tables">
             <div class="sidebar-heading">
               <label class="search-label" for="table-search">Tables</label>
               <div class="sidebar-actions">
                 <button id="refresh-schema" class="icon-button compact" type="button" aria-label="Refresh schema" title="Refresh schema">
                   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M18.5 9A7 7 0 0 0 6 6.5L4 9M5.5 15A7 7 0 0 0 18 17.5l2-2.5"/></svg>
-                </button>
-                <button id="toggle-tables" class="icon-button compact" type="button" aria-label="Hide tables" title="Hide tables" aria-expanded="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
                 </button>
               </div>
             </div>
@@ -74,17 +67,28 @@
               <div><dt>Save</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>S</kbd></dd></div>
               <div><dt>Add note at cursor</dt><dd><kbd>N</kbd></dd></div>
               <div><dt>Toggle tables</dt><dd><kbd>T</kbd></dd></div>
+              <div><dt>Zoom in</dt><dd><kbd>+</kbd></dd></div>
+              <div><dt>Zoom out</dt><dd><kbd>−</kbd></dd></div>
+              <div><dt>Fit diagram</dt><dd><kbd>0</kbd></dd></div>
               <div><dt>Shortcut help</dt><dd><kbd>?</kbd></dd></div>
             </dl>
+          </div>
+          <div class="canvas-tools" aria-label="Canvas tools">
+            <button id="toggle-tables" class="icon-button" type="button" aria-label="Show tables" title="Show tables (T)" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
+            </button>
+            <button id="add-note" class="icon-button" type="button" aria-label="Add note" title="Add note (N)">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3h14v13l-5 5H5Z"/><path d="M14 21v-5h5M12 7v6M9 10h6"/></svg>
+            </button>
           </div>
           <div class="canvas-footer">
             <a class="canvas-brand" href="https://github.com/FASCINATION-works/CanvasERD" target="_blank" rel="noopener noreferrer">CanvasERD</a>
             <div class="canvas-controls" aria-label="View controls">
               <span class="button-group">
-                <button id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out">−</button>
-                <button id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+                <button id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out (−)">−</button>
+                <button id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in (+)">+</button>
               </span>
-              <button id="reset-view" class="icon-button" type="button" aria-label="Fit diagram" title="Fit diagram">
+              <button id="reset-view" class="icon-button" type="button" aria-label="Fit diagram" title="Fit diagram (0)">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/><path d="m3 8 5-5m8 0 5 5M3 16l5 5m8 0 5-5"/></svg>
               </button>
               <button id="shortcut-help" class="icon-button" type="button" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" aria-expanded="false">

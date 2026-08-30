@@ -33,9 +33,14 @@ class ServerTest < Minitest::Test
     assert_match(/<button id="save-diagram"[^>]* disabled>/, response.body)
     assert_match(/<select id="saved-diagrams"[^>]* hidden>/, response.body)
     assert_includes response.body, 'aria-label="Refresh schema"'
-    assert_includes response.body, 'id="tables-sidebar"'
+    assert_includes response.body, 'id="tables-sidebar" class="sidebar collapsed"'
     assert_includes response.body, 'id="toggle-tables"'
-    assert_includes response.body, 'class="icon-button floating-add-note"'
+    assert_includes response.body, 'class="canvas-tools"'
+    assert_includes response.body, 'title="Add note (N)"'
+    assert_includes response.body, 'title="Show tables (T)"'
+    assert_includes response.body, 'title="Zoom in (+)"'
+    assert_includes response.body, 'title="Fit diagram (0)"'
+    assert_includes response.body, "Ctrl-O"
     assert_includes response.body, 'id="shortcut-help"'
     assert_includes response.body, 'id="shortcut-panel"'
     assert_includes response.body, "Add note at cursor"

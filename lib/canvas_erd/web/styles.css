@@ -206,7 +206,6 @@ select:focus-visible {
   background: rgba(255, 255, 255, 0.94);
   padding: 1rem;
   box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
-  transition: width 120ms ease, height 120ms ease, padding 120ms ease;
 }
 
 .sidebar-heading {
@@ -222,25 +221,7 @@ select:focus-visible {
 }
 
 .sidebar.collapsed {
-  right: auto;
-  bottom: auto;
-  width: 2.35rem;
-  height: 2.35rem;
-  padding: 0.2rem;
-}
-
-.sidebar.collapsed .search-label,
-.sidebar.collapsed #refresh-schema,
-.sidebar.collapsed .sidebar-content {
   display: none;
-}
-
-.sidebar.collapsed .sidebar-heading {
-  margin: 0;
-}
-
-.sidebar.collapsed .sidebar-actions {
-  gap: 0;
 }
 
 .search-label {
@@ -318,12 +299,19 @@ select:focus-visible {
   background-size: 20px 20px;
 }
 
-.floating-add-note {
+.canvas-tools {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
+  bottom: 0.75rem;
+  left: 50%;
   z-index: 2;
-  border-radius: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.25rem;
+  transform: translateX(-50%);
   box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
 }
 
