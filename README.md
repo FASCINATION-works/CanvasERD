@@ -75,7 +75,8 @@ Build the gem:
 gem build canvas_erd.gemspec
 ```
 
-Fabric.js 7.4.0 is vendored under `lib/canvas_erd/web/vendor`. Its license is included in `licenses/FABRIC-JS-LICENSE.txt`.
+[Fabric.js](https://fabricjs.com/) 7.4.0 is vendored under `lib/canvas_erd/web/vendor`. Its license is included in `licenses/FABRIC-JS-LICENSE.txt`.
+Icons from [iconoir](https://iconoir.com/)
 
 ## License
 
