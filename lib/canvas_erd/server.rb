@@ -11,9 +11,12 @@ module CanvasERD
       "/" => ["index.html", "text/html; charset=utf-8"],
       "/assets/app.js" => ["app.js", "application/javascript; charset=utf-8"],
       "/assets/document.js" => ["document.js", "application/javascript; charset=utf-8"],
+      "/assets/layout.js" => ["layout.js", "application/javascript; charset=utf-8"],
       "/assets/png.js" => ["png.js", "application/javascript; charset=utf-8"],
       "/assets/styles.css" => ["styles.css", "text/css; charset=utf-8"],
-      "/assets/fabric.min.js" => ["vendor/fabric.min.js", "application/javascript; charset=utf-8"]
+      "/assets/fabric.min.js" => ["vendor/fabric.min.js", "application/javascript; charset=utf-8"],
+      "/assets/elk-api.js" => ["vendor/elk-api.js", "application/javascript; charset=utf-8"],
+      "/assets/elk-worker.min.js" => ["vendor/elk-worker.min.js", "application/javascript; charset=utf-8"]
     }.freeze
 
     attr_reader :schema

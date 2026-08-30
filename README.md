@@ -3,6 +3,7 @@
 CanvasERD is a companion gem for editing diagrams generated from Rails ERD domain models in a local browser.
 
 The editor renders Rails models and relationships on an interactive Fabric.js canvas.
+New diagrams use ELK's layered graph layout to arrange tables from their Rails relationships.
 
 ## Installation
 
@@ -40,6 +41,7 @@ The editor's saved-diagram menu loads these files directly. You can also open a 
 
 - Drag tables to reposition them.
 - Use the table sidebar to add or remove tables without losing their positions.
+- Use **Layout tables** to rearrange the tables currently on the canvas with ELK without moving notes or hidden tables.
 - Pinch over the canvas or use the toolbar buttons to zoom.
 - Use a two-finger trackpad gesture to pan. Space-drag remains available as a keyboard fallback, and **Fit diagram** resets the view.
 - Add editable notes with **Add note**. Select a note and press Delete to remove it.
@@ -76,8 +78,9 @@ gem build canvas_erd.gemspec
 ```
 
 [Fabric.js](https://fabricjs.com/) 7.4.0 is vendored under `lib/canvas_erd/web/vendor`. Its license is included in `licenses/FABRIC-JS-LICENSE.txt`.
+[elkjs](https://github.com/kieler/elkjs) 0.12.0 is vendored there as a browser API and Web Worker. Its [source is available from the elkjs project](https://github.com/kieler/elkjs/tree/0.12.0), and its license is included in `licenses/ELKJS-LICENSE.md`.
 Icons from [iconoir](https://iconoir.com/)
 
 ## License
 
-CanvasERD is available under the MIT License. Fabric.js remains subject to its included MIT license.
+CanvasERD is available under the MIT License. Fabric.js and elkjs remain subject to their included licenses.

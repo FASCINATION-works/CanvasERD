@@ -35,6 +35,24 @@ test("expands a note background around its text", () => {
   );
 });
 
+test("keeps note selection padding aligned with its background while zooming", () => {
+  assert.equal(documentModel.noteSelectionPadding(0.25), 3);
+  assert.equal(documentModel.noteSelectionPadding(1), 12);
+  assert.equal(documentModel.noteSelectionPadding(4), 48);
+});
+
+test("restores and saves note rotation", () => {
+  assert.deepEqual(
+    documentModel.noteCanvasGeometry({ x: 10, y: 20, width: 220, angle: 35 }),
+    { left: 10, top: 20, width: 220, angle: 35 }
+  );
+  assert.equal(documentModel.noteCanvasGeometry({ x: 10, y: 20, width: 220 }).angle, 0);
+  assert.deepEqual(
+    documentModel.noteStateGeometry({ left: 30, top: 40, width: 110, scaleX: 2, angle: -15, text: "Note" }),
+    { x: 30, y: 40, width: 220, angle: -15, text: "Note" }
+  );
+});
+
 test("uses the editable diagram filename extension", () => {
   assert.equal(documentModel.erdFilename("domain"), "domain.erd.png");
   assert.equal(documentModel.erdFilename("domain.png"), "domain.erd.png");
@@ -70,6 +88,7 @@ test("maps editor keyboard shortcuts to actions", () => {
   assert.equal(documentModel.shortcutAction({ key: "n" }), "addNote");
   assert.equal(documentModel.shortcutAction({ key: "a" }), "arrow");
   assert.equal(documentModel.shortcutAction({ key: "t" }), "toggleTables");
+  assert.equal(documentModel.shortcutAction({ key: "l" }), "layoutTables");
   assert.equal(documentModel.shortcutAction({ key: "+" }), "zoomIn");
   assert.equal(documentModel.shortcutAction({ key: "=" }), "zoomIn");
   assert.equal(documentModel.shortcutAction({ key: "-" }), "zoomOut");
@@ -89,6 +108,25 @@ test("snaps an arrow endpoint to a target edge and resolves its anchor", () => {
   assert.deepEqual(snapped.point, { x: 400, y: 240 });
   assert.deepEqual(snapped.anchor, { x: 1, y: 0.4 });
   assert.deepEqual(documentModel.pointAtAnchor(bounds, snapped.anchor), snapped.point);
+});
+
+test("attaches arrow endpoints to tables and notes", () => {
+  assert.deepEqual(
+    documentModel.arrowAttachment({ canvasErdType: "entity", entityId: "Book" }),
+    { type: "entity", id: "Book" }
+  );
+  assert.deepEqual(
+    documentModel.arrowAttachment({ canvasErdType: "note", noteId: "note-1" }),
+    { type: "note", id: "note-1" }
+  );
+  assert.equal(documentModel.arrowAttachment({ canvasErdType: "arrow" }), null);
+});
+
+test("layers arrows above tables and notes", () => {
+  assert.ok(documentModel.canvasLayer("relationship") < documentModel.canvasLayer("entity"));
+  assert.equal(documentModel.canvasLayer("entity"), documentModel.canvasLayer("note"));
+  assert.ok(documentModel.canvasLayer("arrow") > documentModel.canvasLayer("note"));
+  assert.ok(documentModel.canvasLayer("arrow-endpoint") > documentModel.canvasLayer("arrow"));
 });
 
 test("stores transformed arrow endpoints without replacing the selected object", () => {

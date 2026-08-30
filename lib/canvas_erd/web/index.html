@@ -69,6 +69,7 @@
               <div><dt>Arrow tool</dt><dd><kbd>A</kbd></dd></div>
               <div><dt>Free arrow endpoint</dt><dd><kbd>Ctrl</kbd></dd></div>
               <div><dt>Toggle tables</dt><dd><kbd>T</kbd></dd></div>
+              <div><dt>Layout tables</dt><dd><kbd>L</kbd></dd></div>
               <div><dt>Zoom in</dt><dd><kbd>+</kbd></dd></div>
               <div><dt>Zoom out</dt><dd><kbd>−</kbd></dd></div>
               <div><dt>Fit diagram</dt><dd><kbd>0</kbd></dd></div>
@@ -78,6 +79,9 @@
           <div class="canvas-tools" aria-label="Canvas tools">
             <button id="toggle-tables" class="icon-button" type="button" aria-label="Show tables" title="Show tables (T)" aria-expanded="false">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M3 20.4V3.6C3 3.26863 3.26863 3 3.6 3H20.4C20.7314 3 21 3.26863 21 3.6V20.4C21 20.7314 20.7314 21 20.4 21H3.6C3.26863 21 3 20.7314 3 20.4Z" stroke="#000000" stroke-width="1.5"></path><path d="M3 16.5H21" stroke="#000000" stroke-width="1.5"></path><path d="M3 12H21" stroke="#000000" stroke-width="1.5"></path><path d="M21 7.5H3" stroke="#000000" stroke-width="1.5"></path><path d="M12 21V3" stroke="#000000" stroke-width="1.5"></path></svg>
+            </button>
+            <button id="layout-tables" class="icon-button" type="button" aria-label="Layout tables" title="Layout tables (L)" aria-expanded="false">
+              <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M21 3.6V12H12V3H20.4C20.7314 3 21 3.26863 21 3.6Z" stroke="#000000" stroke-width="1.5"></path><path d="M21 20.4V12H12V21H20.4C20.7314 21 21 20.7314 21 20.4Z" stroke="#000000" stroke-width="1.5"></path><path d="M3 12V3.6C3 3.26863 3.26863 3 3.6 3H12V12H3Z" stroke="#000000" stroke-width="1.5"></path><path d="M3 12V20.4C3 20.7314 3.26863 21 3.6 21H12V12H3Z" stroke="#000000" stroke-width="1.5"></path></svg>
             </button>
             <button id="add-note" class="icon-button" type="button" aria-label="Add note" title="Add note (N)">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M12 8L12 16M12 8H8M12 8H16" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M21 13.5V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V13.5M21 10.5V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5V10.5" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"></path><path d="M19.5 13.5V10.5H22.5V13.5H19.5Z" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"></path><path d="M1.5 13.5V10.5H4.5V13.5H1.5Z" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"></path></svg>
@@ -105,6 +109,8 @@
         </section>
       </main>
     </div>
+    <script src="/assets/elk-api.js" defer></script>
+    <script src="/assets/layout.js" defer></script>
     <script src="/assets/fabric.min.js" defer></script>
     <script src="/assets/document.js" defer></script>
     <script src="/assets/png.js" defer></script>

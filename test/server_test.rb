@@ -35,6 +35,7 @@ class ServerTest < Minitest::Test
     assert_includes response.body, 'aria-label="Refresh schema"'
     assert_includes response.body, 'id="tables-sidebar" class="sidebar collapsed"'
     assert_includes response.body, 'id="toggle-tables"'
+    assert_includes response.body, 'id="layout-tables"'
     assert_includes response.body, 'class="canvas-tools"'
     assert_includes response.body, 'title="Add note (N)"'
     assert_includes response.body, 'id="add-arrow"'
@@ -47,6 +48,7 @@ class ServerTest < Minitest::Test
     assert_includes response.body, 'id="shortcut-help"'
     assert_includes response.body, 'id="shortcut-panel"'
     assert_includes response.body, "Add note at cursor"
+    assert_includes response.body, '<dt>Layout tables</dt><dd><kbd>L</kbd>'
     assert_includes response.body, '<option value="" selected>Untitled ERD</option>'
     assert_includes response.body, 'href="https://github.com/FASCINATION-works/CanvasERD"'
     assert_includes response.body, '<svg '
@@ -105,8 +107,11 @@ class ServerTest < Minitest::Test
   def test_serves_only_known_static_assets
     javascript = @request.get("/assets/app.js")
     document_model = @request.get("/assets/document.js")
+    layout_model = @request.get("/assets/layout.js")
     png_model = @request.get("/assets/png.js")
     fabric = @request.get("/assets/fabric.min.js")
+    elk_api = @request.get("/assets/elk-api.js")
+    elk_worker = @request.get("/assets/elk-worker.min.js")
     missing = @request.get("/assets/../server.rb")
 
     assert_equal 200, javascript.status
@@ -114,10 +119,16 @@ class ServerTest < Minitest::Test
     assert_equal "no-store", javascript["cache-control"]
     assert_equal 200, document_model.status
     assert_includes document_model.body, "CanvasERDDocument"
+    assert_equal 200, layout_model.status
+    assert_includes layout_model.body, "CanvasERDLayout"
     assert_equal 200, png_model.status
     assert_includes png_model.body, "CanvasERDPng"
     assert_equal 200, fabric.status
     assert_includes fabric.body, "e.fabric={}"
+    assert_equal 200, elk_api.status
+    assert_includes elk_api.body, "g.ELK = f()"
+    assert_equal 200, elk_worker.status
+    assert_operator elk_worker.body.bytesize, :>, 1_000_000
     assert_equal 404, missing.status
     assert_match(/\.canvas-footer \{[^}]*right: 0\.75rem;/m, @request.get("/assets/styles.css").body)
   end
