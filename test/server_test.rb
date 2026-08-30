@@ -37,6 +37,9 @@ class ServerTest < Minitest::Test
     assert_includes response.body, 'id="toggle-tables"'
     assert_includes response.body, 'class="canvas-tools"'
     assert_includes response.body, 'title="Add note (N)"'
+    assert_includes response.body, 'id="add-arrow"'
+    assert_includes response.body, "Arrow tool (A)"
+    assert_includes response.body, "Free arrow endpoint"
     assert_includes response.body, 'title="Show tables (T)"'
     assert_includes response.body, 'title="Zoom in (+)"'
     assert_includes response.body, 'title="Fit diagram (0)"'

@@ -68,6 +68,7 @@ test("maps editor keyboard shortcuts to actions", () => {
   assert.equal(documentModel.shortcutAction({ key: "o", metaKey: true }), "open");
   assert.equal(documentModel.shortcutAction({ key: "n", ctrlKey: true }), "new");
   assert.equal(documentModel.shortcutAction({ key: "n" }), "addNote");
+  assert.equal(documentModel.shortcutAction({ key: "a" }), "arrow");
   assert.equal(documentModel.shortcutAction({ key: "t" }), "toggleTables");
   assert.equal(documentModel.shortcutAction({ key: "+" }), "zoomIn");
   assert.equal(documentModel.shortcutAction({ key: "=" }), "zoomIn");
@@ -79,6 +80,25 @@ test("maps editor keyboard shortcuts to actions", () => {
 
 test("centers a keyboard-created note at the canvas pointer", () => {
   assert.deepEqual(documentModel.notePositionAt({ x: 500, y: 400 }), { x: 390, y: 355 });
+});
+
+test("snaps an arrow endpoint to a target edge and resolves its anchor", () => {
+  const bounds = { left: 100, top: 200, width: 300, height: 100 };
+  const snapped = documentModel.snapPointToBounds({ x: 390, y: 240 }, bounds);
+
+  assert.deepEqual(snapped.point, { x: 400, y: 240 });
+  assert.deepEqual(snapped.anchor, { x: 1, y: 0.4 });
+  assert.deepEqual(documentModel.pointAtAnchor(bounds, snapped.anchor), snapped.point);
+});
+
+test("stores transformed arrow endpoints without replacing the selected object", () => {
+  assert.deepEqual(
+    documentModel.transformedArrowEndpoints(
+      { x1: -10, y1: -20, x2: 10, y2: 20 },
+      [2, 0, 0, 2, 100, 200]
+    ),
+    { start: { x: 80, y: 160 }, end: { x: 120, y: 240 } }
+  );
 });
 
 test("selects only the diagram that is actually loaded", () => {
@@ -154,7 +174,12 @@ test("reconciles schema changes without losing diagram edits", () => {
   const state = {
     includedEntityIds: ["Author", "Book"],
     positions: { Author: { x: 800, y: 400 }, Book: { x: 20, y: 30 } },
-    notes: [{ id: "note-1", text: "Keep me", x: 5, y: 6, width: 200 }]
+    notes: [{ id: "note-1", text: "Keep me", x: 5, y: 6, width: 200 }],
+    arrows: [{
+      id: "arrow-1",
+      start: { x: 1, y: 2, attachment: { type: "entity", id: "Author", x: 1, y: 0.5 } },
+      end: { x: 3, y: 4, attachment: null }
+    }]
   };
 
   const result = documentModel.reconcileState(state, previousSchema, nextSchema);
@@ -165,6 +190,9 @@ test("reconciles schema changes without losing diagram edits", () => {
   assert.ok(result.state.positions.Review.y > 400 + documentModel.tableHeight(nextSchema.entities[0]));
   assert.deepEqual(result.state.notes, state.notes);
   assert.notEqual(result.state.notes, state.notes);
+  assert.deepEqual(result.state.arrows, state.arrows);
+  assert.notEqual(result.state.arrows, state.arrows);
+  assert.notEqual(result.state.arrows[0].start, state.arrows[0].start);
   assert.deepEqual(result.changes.entities, {
     added: ["Review"],
     removed: ["Book"],

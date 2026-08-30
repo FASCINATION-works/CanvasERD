@@ -12,7 +12,16 @@ const documentData = {
   format: "canvas_erd",
   version: 1,
   schema: { entities: [{ id: "Book" }], relationships: [], specializations: [] },
-  state: { includedEntityIds: ["Book"], positions: {}, notes: [] }
+  state: {
+    includedEntityIds: ["Book"],
+    positions: {},
+    notes: [],
+    arrows: [{
+      id: "arrow-1",
+      start: { x: 10, y: 20, attachment: { type: "entity", id: "Book", x: 1, y: 0.5 } },
+      end: { x: 100, y: 120, attachment: null }
+    }]
+  }
 };
 
 test("embeds and extracts an editable document without changing PNG identity", () => {
