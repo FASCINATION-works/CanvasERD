@@ -26,12 +26,19 @@ class ServerTest < Minitest::Test
     assert_includes response.body, '<h1 id="diagram-name-display">Untitled ERD</h1>'
     assert_includes response.body, 'id="diagram-name"'
     assert_includes response.body, 'id="edit-diagram-name"'
+    assert_includes response.body, 'class="diagram-toolbar"'
     assert_includes response.body, 'id="open-diagram"'
     assert_includes response.body, 'id="new-diagram"'
     assert_includes response.body, 'id="save-diagram"'
     assert_match(/<button id="save-diagram"[^>]* disabled>/, response.body)
     assert_match(/<select id="saved-diagrams"[^>]* hidden>/, response.body)
     assert_includes response.body, 'aria-label="Refresh schema"'
+    assert_includes response.body, 'id="tables-sidebar"'
+    assert_includes response.body, 'id="toggle-tables"'
+    assert_includes response.body, 'class="icon-button floating-add-note"'
+    assert_includes response.body, 'id="shortcut-help"'
+    assert_includes response.body, 'id="shortcut-panel"'
+    assert_includes response.body, "Add note at cursor"
     assert_includes response.body, '<option value="" selected>Untitled ERD</option>'
     assert_includes response.body, 'href="https://github.com/FASCINATION-works/CanvasERD"'
     assert_includes response.body, '<svg '

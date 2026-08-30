@@ -64,6 +64,19 @@ test("recognizes the platform save shortcuts", () => {
   assert.equal(documentModel.isSaveShortcut({ key: "s", metaKey: false, ctrlKey: false }), false);
 });
 
+test("maps editor keyboard shortcuts to actions", () => {
+  assert.equal(documentModel.shortcutAction({ key: "o", metaKey: true }), "open");
+  assert.equal(documentModel.shortcutAction({ key: "n", ctrlKey: true }), "new");
+  assert.equal(documentModel.shortcutAction({ key: "n" }), "addNote");
+  assert.equal(documentModel.shortcutAction({ key: "t" }), "toggleTables");
+  assert.equal(documentModel.shortcutAction({ key: "?", shiftKey: true }), "help");
+  assert.equal(documentModel.shortcutAction({ key: "n", altKey: true }), null);
+});
+
+test("centers a keyboard-created note at the canvas pointer", () => {
+  assert.deepEqual(documentModel.notePositionAt({ x: 500, y: 400 }), { x: 390, y: 355 });
+});
+
 test("selects only the diagram that is actually loaded", () => {
   const diagrams = ["Domain.erd.png"];
 

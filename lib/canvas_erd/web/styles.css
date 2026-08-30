@@ -78,20 +78,23 @@ select:focus-visible {
 
 .app-shell {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr;
 }
 
-.toolbar {
+.diagram-toolbar {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
   z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  min-height: 4.5rem;
-  border-bottom: 1px solid #dce2eb;
-  background: #ffffff;
-  padding: 0.65rem 1rem;
-  box-shadow: 0 1px 5px rgba(15, 23, 42, 0.06);
+  gap: 1rem;
+  max-width: calc(100% - 5rem);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 0.55rem 0.65rem;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
 }
 
 .diagram-identity {
@@ -127,6 +130,7 @@ select:focus-visible {
 .button-group,
 .selection-actions,
 .sidebar-heading,
+.sidebar-actions,
 .canvas-footer,
 .canvas-controls {
   display: flex;
@@ -182,24 +186,61 @@ select:focus-visible {
 }
 
 .workspace {
+  position: relative;
+  height: 100%;
   min-height: 0;
-  display: grid;
-  grid-template-columns: 17rem 1fr;
 }
 
 .sidebar {
-  z-index: 1;
+  position: absolute;
+  top: 6.25rem;
+  bottom: 3.75rem;
+  left: 0.75rem;
+  z-index: 2;
   display: flex;
+  width: 17rem;
   min-height: 0;
   flex-direction: column;
-  border-right: 1px solid #dce2eb;
-  background: #ffffff;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.94);
   padding: 1rem;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
+  transition: width 120ms ease, height 120ms ease, padding 120ms ease;
 }
 
 .sidebar-heading {
   justify-content: space-between;
   margin-bottom: 0.45rem;
+}
+
+.sidebar-content {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.sidebar.collapsed {
+  right: auto;
+  bottom: auto;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0.2rem;
+}
+
+.sidebar.collapsed .search-label,
+.sidebar.collapsed #refresh-schema,
+.sidebar.collapsed .sidebar-content {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-heading {
+  margin: 0;
+}
+
+.sidebar.collapsed .sidebar-actions {
+  gap: 0;
 }
 
 .search-label {
@@ -232,6 +273,7 @@ select:focus-visible {
 
 .table-list {
   min-height: 0;
+  flex: 1;
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
@@ -266,12 +308,23 @@ select:focus-visible {
 
 .canvas-panel {
   position: relative;
+  width: 100%;
+  height: 100%;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
   background-color: #f7f8fb;
   background-image: radial-gradient(#cbd4e1 0.8px, transparent 0.8px);
   background-size: 20px 20px;
+}
+
+.floating-add-note {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  border-radius: 0.65rem;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
 }
 
 .canvas-panel .canvas-container {
@@ -298,6 +351,57 @@ select:focus-visible {
 .canvas-brand:hover {
   color: #243b63;
   text-decoration: underline;
+}
+
+.shortcut-panel {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 3.75rem;
+  z-index: 2;
+  width: 18rem;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.8rem;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
+}
+
+.shortcut-panel h2 {
+  margin: 0 0 0.65rem;
+  color: #172554;
+  font-size: 0.9rem;
+}
+
+.shortcut-panel dl {
+  margin: 0;
+}
+
+.shortcut-panel dl div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 1.8rem;
+  font-size: 0.76rem;
+}
+
+.shortcut-panel dt {
+  color: #526277;
+}
+
+.shortcut-panel dd {
+  margin: 0;
+  white-space: nowrap;
+}
+
+kbd {
+  border: 1px solid #cbd3df;
+  border-radius: 0.25rem;
+  color: #263447;
+  background: #f8fafc;
+  padding: 0.08rem 0.3rem;
+  font: 0.7rem ui-monospace, SFMono-Regular, Menlo, monospace;
+  box-shadow: 0 1px 0 #cbd3df;
 }
 
 .notice {
@@ -338,18 +442,4 @@ select:focus-visible {
   color: #991b1b;
   border-color: #fecaca;
   background: #fff7f7;
-}
-
-[hidden] {
-  display: none !important;
-}
-
-@media (max-width: 760px) {
-  .workspace {
-    grid-template-columns: 12rem 1fr;
-  }
-
-  .canvas-help {
-    display: none;
-  }
 }
