@@ -6,6 +6,7 @@ Gem::Specification.new do |spec|
   spec.name = "canvas_erd"
   spec.version = CanvasERD::VERSION
   spec.authors = ["Marc Heiligers"]
+  spec.email = ["rubygems@heiligers.us"]
 
   spec.summary = "Edit Rails ERD diagrams on an interactive canvas"
   spec.description = "A local browser-based editor for diagrams generated from Rails ERD domain models."
@@ -25,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.executables = ["canvas_erd"]
   spec.require_paths = ["lib"]
 
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
   spec.metadata["rubygems_mfa_required"] = "true"
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
