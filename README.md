@@ -74,7 +74,7 @@ bundle exec rake test
 Build the gem:
 
 ```sh
-gem build canvas_erd.gemspec
+bundle exec rake build
 ```
 
 ## License

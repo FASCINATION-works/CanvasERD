@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "digest"
+require "open3"
 require_relative "test_helper"
 
 class PackageTest < Minitest::Test
@@ -57,5 +58,14 @@ class PackageTest < Minitest::Test
     assert_equal "~> 2.1", dependencies.fetch("rails-erd")
     assert_equal ">= 2.2, < 4", dependencies.fetch("rack")
     refute dependencies.key?("webrick")
+  end
+
+  def test_standard_bundler_gem_tasks_are_available
+    output, error, status = Open3.capture3("bundle", "exec", "rake", "-T", chdir: ROOT)
+
+    assert status.success?, error
+    %w[build build:checksum clean clobber install install:local release].each do |task|
+      assert_match(/^rake #{Regexp.escape(task)}(?:\[remote\])?\s/, output)
+    end
   end
 end
