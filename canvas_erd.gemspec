@@ -5,7 +5,7 @@ require_relative "lib/canvas_erd/version"
 Gem::Specification.new do |spec|
   spec.name = "canvas_erd"
   spec.version = CanvasERD::VERSION
-  spec.authors = ["CanvasERD contributors"]
+  spec.authors = ["Marc Heiligers"]
 
   spec.summary = "Edit Rails ERD diagrams on an interactive canvas"
   spec.description = "A local browser-based editor for diagrams generated from Rails ERD domain models."

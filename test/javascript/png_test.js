@@ -37,3 +37,9 @@ test("rejects a PNG without an editable document", () => {
     /does not contain an editable CanvasERD diagram/
   );
 });
+
+test("scales oversized diagram previews within browser canvas limits", () => {
+  assert.equal(png.exportMultiplier(1000, 1000), 1);
+  assert.equal(png.exportMultiplier(16384, 1024), 0.5);
+  assert.equal(png.exportMultiplier(8192, 8192), 0.5);
+});

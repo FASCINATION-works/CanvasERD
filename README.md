@@ -77,10 +77,10 @@ Build the gem:
 gem build canvas_erd.gemspec
 ```
 
-[Fabric.js](https://fabricjs.com/) 7.4.0 is vendored under `lib/canvas_erd/web/vendor`. Its license is included in `licenses/FABRIC-JS-LICENSE.txt`.
-[elkjs](https://github.com/kieler/elkjs) 0.12.0 is vendored there as a browser API and Web Worker. Its [source is available from the elkjs project](https://github.com/kieler/elkjs/tree/0.12.0), and its license is included in `licenses/ELKJS-LICENSE.md`.
-Icons from [iconoir](https://iconoir.com/)
-
 ## License
 
-CanvasERD is available under the MIT License. Fabric.js and elkjs remain subject to their included licenses.
+CanvasERD is available under the MIT License. Dependencies remain subject to their included licenses.
+
+[Fabric.js](https://fabricjs.com/) 7.4.0 is vendored under `lib/canvas_erd/web/vendor`. Its license is included in `licenses/FABRIC-JS-LICENSE.txt`.
+[elkjs](https://github.com/kieler/elkjs) 0.12.0 is vendored there as a browser API and Web Worker. Its [source is available from the elkjs project](https://github.com/kieler/elkjs/tree/0.12.0), and its license is included in `licenses/ELKJS-LICENSE.md`.
+Icons from [iconoir](https://iconoir.com/) directly embedded in the HTML, and it's lincense is included in `licenses/ICONOIR-LICENSE`.

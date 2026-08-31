@@ -182,17 +182,21 @@ module CanvasERD
       "http://#{HOST}:#{port}/"
     end
 
-    def self.rack_server_class
-      require "rackup"
-      Rackup::Server
-    rescue LoadError
-      begin
-        require "rack/server"
-        Rack::Server
-      rescue LoadError => error
-        raise Error, "Rackup is not available in this Rails application: #{error.message}"
-      end
+    def self.rack_server_class(loader: method(:load_rack_server_class))
+      loader.call("rackup", "Rackup") ||
+        loader.call("rack/server", "Rack") ||
+        raise(Error, "No Rack server is available in this Rails application")
     end
+
+    def self.load_rack_server_class(feature, namespace_name)
+      require feature
+      namespace = Object.const_get(namespace_name)
+      namespace.const_get(:Server, false) if namespace.const_defined?(:Server, false)
+    rescue LoadError, NameError
+      nil
+    end
+
+    private_class_method :load_rack_server_class
 
     private
 

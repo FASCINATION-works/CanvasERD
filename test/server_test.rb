@@ -200,6 +200,18 @@ class ServerTest < Minitest::Test
     assert_equal "http://127.0.0.1:4567/", server.url
   end
 
+  def test_server_uses_rack_server_when_rackup_has_no_server
+    rack_server = Class.new
+    loaded = []
+    loader = lambda do |feature, namespace|
+      loaded << [feature, namespace]
+      rack_server if namespace == "Rack"
+    end
+
+    assert_equal rack_server, CanvasERD::Server.rack_server_class(loader: loader)
+    assert_equal [["rackup", "Rackup"], ["rack/server", "Rack"]], loaded
+  end
+
   private
 
   def editable_png
