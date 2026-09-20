@@ -44,13 +44,250 @@ test("keeps note selection padding aligned with its background while zooming", (
 test("restores and saves note rotation", () => {
   assert.deepEqual(
     documentModel.noteCanvasGeometry({ x: 10, y: 20, width: 220, angle: 35 }),
-    { left: 10, top: 20, width: 220, angle: 35 }
+    {
+      left: 10,
+      top: 20,
+      width: 220,
+      angle: 35,
+      ...documentModel.DEFAULT_NOTE_FORMATTING
+    }
   );
   assert.equal(documentModel.noteCanvasGeometry({ x: 10, y: 20, width: 220 }).angle, 0);
   assert.deepEqual(
     documentModel.noteStateGeometry({ left: 30, top: 40, width: 110, scaleX: 2, angle: -15, text: "Note" }),
-    { x: 30, y: 40, width: 220, angle: -15, text: "Note" }
+    { x: 30, y: 40, width: 220, angle: -15, text: "Note", ...documentModel.DEFAULT_NOTE_FORMATTING }
   );
+});
+
+test("restores and saves whole-note formatting", () => {
+  const formatting = {
+    paragraphStyle: "heading",
+    fontWeight: "bold",
+    fontStyle: "italic",
+    underline: true,
+    fill: "#2563eb",
+    backgroundColor: "#dbeafe",
+    fontFamily: "Georgia",
+    fontSize: 22,
+    lineHeight: 1.15,
+    textAlign: "center"
+  };
+
+  assert.deepEqual(documentModel.noteFormatting(formatting), formatting);
+  assert.deepEqual(
+    documentModel.noteCanvasGeometry({ x: 10, y: 20, width: 220, ...formatting }),
+    { left: 10, top: 20, width: 220, angle: 0, ...formatting }
+  );
+  assert.deepEqual(
+    documentModel.noteStateGeometry({
+      left: 30,
+      top: 40,
+      width: 220,
+      scaleX: 1,
+      angle: 0,
+      text: "Formatted",
+      ...formatting
+    }),
+    { x: 30, y: 40, width: 220, angle: 0, text: "Formatted", ...formatting }
+  );
+});
+
+test("uses default formatting for notes saved before formatting was available", () => {
+  assert.deepEqual(documentModel.noteFormatting({}), documentModel.DEFAULT_NOTE_FORMATTING);
+  assert.equal(documentModel.noteFormatting({ fontFamily: "Papyrus", fontSize: 300 }).fontSize, 15);
+});
+
+test("applies the four paragraph styles", () => {
+  assert.deepEqual(documentModel.noteParagraphStyleFormatting("title"), {
+    paragraphStyle: "title",
+    fontFamily: "Georgia",
+    fontSize: 32,
+    fontWeight: "bold",
+    lineHeight: 1.15
+  });
+  assert.deepEqual(documentModel.noteParagraphStyleFormatting("heading"), {
+    paragraphStyle: "heading",
+    fontFamily: "Georgia",
+    fontSize: 22,
+    fontWeight: "bold",
+    lineHeight: 1.15
+  });
+  assert.equal(documentModel.noteParagraphStyleFormatting("paragraph").fontFamily, "Arial");
+  assert.equal(documentModel.noteParagraphStyleFormatting("code").fontFamily, "Courier New");
+  assert.equal(documentModel.noteParagraphStyleFormatting("unknown").paragraphStyle, "paragraph");
+});
+
+test("maps previously saved font choices to paragraph styles", () => {
+  assert.equal(documentModel.noteParagraphStyle({ fontFamily: "Georgia", fontSize: 32 }), "title");
+  assert.equal(documentModel.noteParagraphStyle({ fontFamily: "Times New Roman", fontSize: 24 }), "heading");
+  assert.equal(documentModel.noteParagraphStyle({ fontFamily: "Courier New" }), "code");
+  assert.equal(documentModel.noteParagraphStyle({ fontFamily: "Verdana", fontSize: 48 }), "paragraph");
+});
+
+test("inherits formatting from the last touched note", () => {
+  const previous = {
+    paragraphStyle: "code",
+    fontWeight: "bold",
+    fontStyle: "italic",
+    underline: true,
+    fill: "#155e75",
+    backgroundColor: "transparent",
+    textAlign: "center"
+  };
+  const inherited = documentModel.inheritedNoteFormatting(previous);
+
+  assert.deepEqual(inherited, {
+    ...previous,
+    fontFamily: "Courier New",
+    fontSize: 14,
+    lineHeight: 1.2
+  });
+  assert.notEqual(inherited, previous);
+  assert.deepEqual(documentModel.inheritedNoteFormatting(), documentModel.DEFAULT_NOTE_FORMATTING);
+});
+
+test("builds color swatches from defaults and colors used by notes", () => {
+  const defaults = ["#ffffff", "#000000"];
+  const notes = [
+    { fill: "#123456", backgroundColor: "#ABCDEF" },
+    { fill: "#ffffff", backgroundColor: "not-a-color" }
+  ];
+
+  assert.deepEqual(
+    documentModel.noteColorSwatches(notes, "fill", defaults),
+    ["#ffffff", "#000000", "#123456"]
+  );
+  assert.deepEqual(
+    documentModel.noteColorSwatches(notes, "backgroundColor", defaults),
+    ["#ffffff", "#000000", "#abcdef"]
+  );
+  assert.deepEqual(
+    documentModel.noteColorSwatches(notes.slice(1), "fill", defaults),
+    defaults
+  );
+});
+
+test("uses position-matched background and foreground palettes", () => {
+  assert.deepEqual(documentModel.DEFAULT_BACKGROUND_COLORS, [
+    "#dbeafe", "#fee2e2", "#ffedd5", "#fff2a8",
+    "#dcfce7", "#cffafe", "#ede9fe", "#f3f4f6"
+  ]);
+  assert.deepEqual(documentModel.DEFAULT_FOREGROUND_COLORS, [
+    "#243b63", "#7f1d1d", "#9a3412", "#854d0e",
+    "#166534", "#155e75", "#6b21a8", "#374151"
+  ]);
+  assert.deepEqual(documentModel.DEFAULT_TABLE_HEADER_COLORS, documentModel.DEFAULT_FOREGROUND_COLORS);
+  assert.equal(documentModel.DEFAULT_ARROW_FORMATTING.color, documentModel.DEFAULT_FOREGROUND_COLORS[0]);
+  assert.equal(documentModel.DEFAULT_BACKGROUND_COLORS.includes("transparent"), false);
+});
+
+test("normalizes arrow formatting and line styles", () => {
+  assert.deepEqual(documentModel.arrowFormatting({}), documentModel.DEFAULT_ARROW_FORMATTING);
+  assert.deepEqual(documentModel.arrowFormatting({
+    color: "#123456",
+    strokeWidth: "6.5",
+    lineStyle: "dotted",
+    startHead: "circle-open",
+    endHead: "diamond-open"
+  }), {
+    color: "#123456",
+    strokeWidth: 6.5,
+    lineStyle: "dotted",
+    startHead: "circle-open",
+    endHead: "diamond-open"
+  });
+  assert.equal(documentModel.arrowFormatting({ startHead: "open" }).startHead, "open");
+  assert.equal(documentModel.arrowFormatting({ endHead: "circle" }).endHead, "circle");
+  assert.equal(documentModel.arrowFormatting({ endHead: "diamond" }).endHead, "diamond");
+  assert.equal(documentModel.arrowFormatting({ strokeWidth: 100 }).strokeWidth, 20);
+  assert.equal(documentModel.arrowFormatting({ strokeWidth: 0 }).strokeWidth, 0.5);
+  assert.deepEqual(documentModel.arrowStrokeDashArray("dashed"), [10, 7]);
+  assert.deepEqual(documentModel.arrowStrokeDashArray("dotted"), [2, 6]);
+  assert.equal(documentModel.arrowStrokeDashArray("solid"), null);
+});
+
+test("stops arrow shafts at the rear edge of open circle and diamond heads", () => {
+  assert.deepEqual(
+    documentModel.shortenedArrowLinePoints(
+      { x1: 0, y1: 0, x2: 100, y2: 0 },
+      "circle-open",
+      "diamond-open",
+      2
+    ),
+    { x1: 10.08, y1: 0, x2: 87, y2: 0 }
+  );
+  assert.deepEqual(
+    documentModel.shortenedArrowLinePoints(
+      { x1: 0, y1: 0, x2: 100, y2: 0 },
+      "open",
+      "filled",
+      2
+    ),
+    { x1: 0, y1: 0, x2: 100, y2: 0 }
+  );
+});
+
+test("builds arrow color swatches from the foreground palette and used colors", () => {
+  assert.deepEqual(documentModel.arrowColorSwatches([
+    { color: "#ABCDEF" },
+    { color: documentModel.DEFAULT_FOREGROUND_COLORS[0] },
+    { color: "not-a-color" }
+  ]), [
+    ...documentModel.DEFAULT_FOREGROUND_COLORS,
+    "#abcdef"
+  ]);
+});
+
+test("normalizes frame formatting and drag bounds", () => {
+  assert.deepEqual(documentModel.frameFormatting({}), documentModel.DEFAULT_FRAME_FORMATTING);
+  assert.deepEqual(
+    documentModel.frameFormatting({ color: "#abcdef", lineStyle: "dashed" }),
+    { color: "#abcdef", lineStyle: "dashed" }
+  );
+  assert.equal(documentModel.frameFormatting({ lineStyle: "unknown" }).lineStyle, "solid");
+  assert.deepEqual(
+    documentModel.frameBounds({ x: 90, y: 80 }, { x: 10, y: 20 }),
+    { x: 10, y: 20, width: 80, height: 60 }
+  );
+  assert.deepEqual(
+    documentModel.frameLabelPosition({ x: 10, y: 20 }),
+    { x: 20, y: 20 }
+  );
+  assert.deepEqual(
+    documentModel.frameLabelCanvasStyle({ x: 10, y: 20, color: "#abcdef" }),
+    {
+      left: 20,
+      top: 20,
+      originY: "center",
+      fill: "#abcdef",
+      backgroundColor: "#f7f8fb"
+    }
+  );
+});
+
+test("builds frame color swatches from the foreground palette and used colors", () => {
+  assert.deepEqual(documentModel.frameColorSwatches([
+    { color: "#ABCDEF" },
+    { color: documentModel.DEFAULT_FOREGROUND_COLORS[0] }
+  ]), [
+    ...documentModel.DEFAULT_FOREGROUND_COLORS,
+    "#abcdef"
+  ]);
+});
+
+test("separates default colors from colors used by the document", () => {
+  const colors = ["#111111", "#222222", "#abcdef", "#123456"];
+
+  assert.deepEqual(documentModel.colorPaletteSections(colors, colors.slice(0, 2)), {
+    defaults: ["#111111", "#222222"],
+    custom: ["#abcdef", "#123456"]
+  });
+});
+
+test("derives a contrasting note border from its background", () => {
+  assert.equal(documentModel.noteBorderColor("#fff2a8"), "#b3a976");
+  assert.equal(documentModel.noteBorderColor("#123456"), "#597189");
+  assert.equal(documentModel.noteBorderColor("transparent"), "#94a3b8");
 });
 
 test("uses the editable diagram filename extension", () => {
@@ -80,6 +317,19 @@ test("recognizes the platform save shortcuts", () => {
   assert.equal(documentModel.isSaveShortcut({ key: "s", metaKey: true, ctrlKey: false }), true);
   assert.equal(documentModel.isSaveShortcut({ key: "S", metaKey: false, ctrlKey: true }), true);
   assert.equal(documentModel.isSaveShortcut({ key: "s", metaKey: false, ctrlKey: false }), false);
+});
+
+test("recognizes whole-note formatting shortcuts", () => {
+  assert.equal(documentModel.noteFormattingShortcut({ key: "b", metaKey: true }), "bold");
+  assert.equal(documentModel.noteFormattingShortcut({ key: "I", ctrlKey: true }), "italic");
+  assert.equal(documentModel.noteFormattingShortcut({ key: "u", metaKey: true }), "underline");
+  assert.equal(documentModel.noteFormattingShortcut({ code: "Digit1", metaKey: true, altKey: true }), "title");
+  assert.equal(documentModel.noteFormattingShortcut({ code: "Digit2", ctrlKey: true, altKey: true }), "heading");
+  assert.equal(documentModel.noteFormattingShortcut({ code: "Digit3", metaKey: true, altKey: true }), "paragraph");
+  assert.equal(documentModel.noteFormattingShortcut({ code: "Digit4", ctrlKey: true, altKey: true }), "code");
+  assert.equal(documentModel.noteFormattingShortcut({ code: "Digit1", metaKey: true }), null);
+  assert.equal(documentModel.noteFormattingShortcut({ key: "b" }), null);
+  assert.equal(documentModel.noteFormattingShortcut({ key: "b", ctrlKey: true, altKey: true }), null);
 });
 
 test("maps editor keyboard shortcuts to actions", () => {
@@ -122,7 +372,18 @@ test("attaches arrow endpoints to tables and notes", () => {
   assert.equal(documentModel.arrowAttachment({ canvasErdType: "arrow" }), null);
 });
 
-test("layers arrows above tables and notes", () => {
+test("opens endpoint editing when an arrow is selected", () => {
+  assert.equal(
+    documentModel.arrowIdForEndpointEditing({ canvasErdType: "arrow", arrowId: "arrow-1" }),
+    "arrow-1"
+  );
+  assert.equal(documentModel.arrowIdForEndpointEditing({ canvasErdType: "arrow-endpoint" }), null);
+  assert.equal(documentModel.arrowIdForEndpointEditing({ canvasErdType: "entity" }), null);
+});
+
+test("layers frames behind relationships and arrows above notes", () => {
+  assert.ok(documentModel.canvasLayer("frame") < documentModel.canvasLayer("frame-label"));
+  assert.ok(documentModel.canvasLayer("frame-label") < documentModel.canvasLayer("relationship"));
   assert.ok(documentModel.canvasLayer("relationship") < documentModel.canvasLayer("entity"));
   assert.equal(documentModel.canvasLayer("entity"), documentModel.canvasLayer("note"));
   assert.ok(documentModel.canvasLayer("arrow") > documentModel.canvasLayer("note"));
@@ -177,6 +438,7 @@ test("removing and restoring an entity preserves its position", () => {
   assert.equal(removed.includedEntityIds.includes("Book"), false);
   assert.equal(restored.includedEntityIds.includes("Book"), true);
   assert.equal(restored.positions, original.positions);
+  assert.deepEqual(original.frames, []);
 });
 
 test("finds tables in single and multiple selections", () => {
@@ -190,6 +452,35 @@ test("finds tables in single and multiple selections", () => {
     ["Book", "Author"]
   );
   assert.deepEqual(documentModel.selectedEntityIds(note), []);
+});
+
+test("stores header colors for selected tables", () => {
+  const state = {
+    includedEntityIds: ["Book", "Author"],
+    positions: {},
+    tableHeaderColors: { Book: "#123456" },
+    notes: []
+  };
+
+  assert.equal(documentModel.tableHeaderColor(state, "Book"), "#123456");
+  assert.equal(
+    documentModel.tableHeaderColor(state, "Author"),
+    documentModel.DEFAULT_TABLE_HEADER_COLOR
+  );
+  assert.equal(documentModel.selectedTableHeaderColor(state, ["Book", "Author"]), null);
+
+  const grouped = documentModel.setTableHeaderColor(state, ["Book", "Author"], "#abcdef");
+  assert.deepEqual(grouped.tableHeaderColors, { Book: "#abcdef", Author: "#abcdef" });
+  assert.equal(documentModel.selectedTableHeaderColor(grouped, ["Book", "Author"]), "#abcdef");
+  assert.ok(documentModel.tableHeaderColorSwatches(grouped.tableHeaderColors).includes("#abcdef"));
+
+  const reset = documentModel.setTableHeaderColor(
+    grouped,
+    ["Book", "Author"],
+    documentModel.DEFAULT_TABLE_HEADER_COLOR
+  );
+  assert.deepEqual(reset.tableHeaderColors, {});
+  assert.equal(documentModel.tableHeaderColorSwatches(reset.tableHeaderColors).includes("#abcdef"), false);
 });
 
 test("reconciles schema changes without losing diagram edits", () => {
@@ -212,11 +503,27 @@ test("reconciles schema changes without losing diagram edits", () => {
   const state = {
     includedEntityIds: ["Author", "Book"],
     positions: { Author: { x: 800, y: 400 }, Book: { x: 20, y: 30 } },
+    tableHeaderColors: { Author: "#166534" },
+    frames: [{
+      id: "frame-1",
+      label: "Publishing",
+      x: 1,
+      y: 2,
+      width: 600,
+      height: 400,
+      color: "#6b21a8",
+      lineStyle: "dotted"
+    }],
     notes: [{ id: "note-1", text: "Keep me", x: 5, y: 6, width: 200 }],
     arrows: [{
       id: "arrow-1",
       start: { x: 1, y: 2, attachment: { type: "entity", id: "Author", x: 1, y: 0.5 } },
-      end: { x: 3, y: 4, attachment: null }
+      end: { x: 3, y: 4, attachment: null },
+      color: "#155e75",
+      strokeWidth: 4,
+      lineStyle: "dashed",
+      startHead: "circle",
+      endHead: "diamond"
     }]
   };
 
@@ -225,6 +532,11 @@ test("reconciles schema changes without losing diagram edits", () => {
   assert.deepEqual(result.state.includedEntityIds, ["Author"]);
   assert.deepEqual(result.state.positions.Author, { x: 800, y: 400 });
   assert.deepEqual(result.state.positions.Book, { x: 20, y: 30 });
+  assert.deepEqual(result.state.tableHeaderColors, state.tableHeaderColors);
+  assert.notEqual(result.state.tableHeaderColors, state.tableHeaderColors);
+  assert.deepEqual(result.state.frames, state.frames);
+  assert.notEqual(result.state.frames, state.frames);
+  assert.notEqual(result.state.frames[0], state.frames[0]);
   assert.ok(result.state.positions.Review.y > 400 + documentModel.tableHeight(nextSchema.entities[0]));
   assert.deepEqual(result.state.notes, state.notes);
   assert.notEqual(result.state.notes, state.notes);
@@ -301,6 +613,76 @@ test("formats bounded and unbounded cardinalities", () => {
   };
 
   assert.equal(documentModel.cardinalityLabel(relationship), "1 — 0..*");
+});
+
+test("maps standard ranges to crow's-foot cardinalities", () => {
+  assert.deepEqual(
+    documentModel.crowFootCardinality({ minimum: 0, maximum: 1 }),
+    { optional: true, many: false }
+  );
+  assert.deepEqual(
+    documentModel.crowFootCardinality({ minimum: 1, maximum: null }),
+    { optional: false, many: true }
+  );
+  assert.equal(documentModel.crowFootCardinality({ minimum: 2, maximum: 5 }), null);
+});
+
+test("builds crow's feet at horizontal and diagonal table edges", () => {
+  const horizontal = documentModel.relationshipEndpointGeometry(
+    { left: 0, top: 0, width: 100, height: 60 },
+    { x: 200, y: 30 },
+    { minimum: 0, maximum: null }
+  );
+  assert.deepEqual(horizontal.boundary, { x: 100, y: 30 });
+  assert.deepEqual(horizontal.shaftPoint, { x: 135, y: 30 });
+  assert.deepEqual(horizontal.circles, [{ center: { x: 128, y: 30 }, radius: 4 }]);
+  assert.deepEqual(horizontal.segments.slice(1, 4).map((segment) => segment.end), [
+    { x: 109, y: 23 },
+    { x: 109, y: 30 },
+    { x: 109, y: 37 }
+  ]);
+
+  const diagonal = documentModel.relationshipEndpointGeometry(
+    { left: 0, top: 0, width: 100, height: 100 },
+    { x: 150, y: 150 },
+    { minimum: 1, maximum: null }
+  );
+  const feet = diagonal.segments.slice(1, 4);
+  const midpoint = {
+    x: (feet[0].end.x + feet[2].end.x) / 2,
+    y: (feet[0].end.y + feet[2].end.y) / 2
+  };
+  assert.ok(Math.abs(diagonal.boundary.x - 100) < 1e-9);
+  assert.ok(Math.abs(diagonal.boundary.y - 100) < 1e-9);
+  assert.ok(Math.abs(midpoint.x - feet[1].end.x) < 1e-9);
+  assert.ok(Math.abs(midpoint.y - feet[1].end.y) < 1e-9);
+  assert.ok(Math.abs(Math.hypot(
+    feet[0].end.x - feet[2].end.x,
+    feet[0].end.y - feet[2].end.y
+  ) - 14) < 1e-9);
+
+  const shallow = documentModel.relationshipEndpointGeometry(
+    { left: 0, top: 0, width: 300, height: 100 },
+    { x: 450, y: 110 },
+    { minimum: 1, maximum: null }
+  );
+  assert.ok(Math.abs(shallow.boundary.x - 300) < 1e-9);
+  assert.ok(Math.abs(shallow.boundary.y - 80) < 1e-9);
+  shallow.segments.slice(1, 4).forEach((segment) => {
+    assert.ok(segment.end.x > 300);
+  });
+});
+
+test("keeps exact text for cardinalities crow's-foot notation cannot represent", () => {
+  const endpoint = documentModel.relationshipEndpointGeometry(
+    { left: 0, top: 0, width: 100, height: 60 },
+    { x: 200, y: 30 },
+    { minimum: 2, maximum: 5 }
+  );
+
+  assert.equal(endpoint.label, "2..5");
+  assert.deepEqual(endpoint.segments, []);
+  assert.deepEqual(endpoint.circles, []);
 });
 
 test("fits diagram bounds into the viewport", () => {

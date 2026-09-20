@@ -92,7 +92,16 @@ module CanvasERD
     end
 
     def document_response
-      document = @document["state"] ? @document : @document.merge("schema" => schema)
+      document = if @document["state"]
+        @document
+      elsif @diagram_store && (name = @diagram_store.most_recent_name)
+        @diagram_store.document(name).merge(
+          "filename" => name,
+          "application_schema" => schema
+        )
+      else
+        @document.merge("schema" => schema)
+      end
       response(
         200,
         "application/json; charset=utf-8",

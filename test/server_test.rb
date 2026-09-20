@@ -80,6 +80,23 @@ class ServerTest < Minitest::Test
     assert_equal "no-store", response["cache-control"]
   end
 
+  def test_serves_the_most_recent_saved_diagram_as_the_initial_document
+    Dir.mktmpdir do |root|
+      store = CanvasERD::DiagramStore.new(root: root)
+      store.write("older.erd.png", editable_png)
+      store.write("newer.erd.png", editable_png)
+      File.utime(Time.at(100), Time.at(100), File.join(root, "docs/erd/older.erd.png"))
+      File.utime(Time.at(200), Time.at(200), File.join(root, "docs/erd/newer.erd.png"))
+      app = CanvasERD::WebApplication.new(schema: SCHEMA, diagram_store: store)
+
+      document = JSON.parse(Rack::MockRequest.new(app).get("/api/document").body)
+
+      assert_equal "newer.erd.png", document.fetch("filename")
+      assert_equal SCHEMA, document.fetch("application_schema")
+      assert_equal ["Book"], document.dig("state", "includedEntityIds")
+    end
+  end
+
   def test_refreshes_and_caches_the_schema_when_requested
     refreshed_schema = SCHEMA.merge("entities" => [{ "id" => "Author" }])
     provider_calls = 0

@@ -31,10 +31,23 @@ module CanvasERD
       Dir.children(directory).select { |name| valid_filename?(name) && File.file?(path_for(name)) }.sort
     end
 
+    def most_recent_name
+      names.max_by { |name| [File.mtime(path_for(name)).to_f, name] }
+    rescue SystemCallError => error
+      raise Error, "Could not inspect saved diagrams: #{error.message}"
+    end
+
+    def document(name)
+      read_diagram(name).last
+    end
+
     def read(name)
+      read_diagram(name).first
+    end
+
+    def read_diagram(name)
       bytes = File.binread(path_for(name))
-      PngDocument.read(StringIO.new(bytes))
-      bytes
+      [bytes, PngDocument.read(StringIO.new(bytes))]
     rescue Errno::ENOENT
       raise NotFound, "Diagram not found: #{name}"
     rescue SystemCallError => error
@@ -42,6 +55,7 @@ module CanvasERD
     rescue PngDocument::Error => error
       raise Error, error.message
     end
+    private :read_diagram
 
     def write(name, bytes)
       path = path_for(name)

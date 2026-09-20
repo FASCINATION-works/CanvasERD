@@ -35,16 +35,20 @@ Diagrams are saved by the editor as `*.erd.png` files under `docs/erd/` in the R
 bundle exec canvas_erd --diagrams-dir db/diagrams
 ```
 
-The editor's saved-diagram menu loads these files directly. You can also open a diagram when starting CanvasERD with `bundle exec canvas_erd path/to/domain.erd.png`.
+The editor opens the most recently modified saved diagram when it starts. Its saved-diagram menu loads other files directly. You can also open a specific diagram with `bundle exec canvas_erd path/to/domain.erd.png`.
 
 ## Editor controls
 
 - Drag tables to reposition them.
 - Use the table sidebar to add or remove tables without losing their positions.
+- Select one or more tables to color their headers and visually group related tables.
 - Use **Layout tables** to rearrange the tables currently on the canvas with ELK without moving notes or hidden tables.
 - Pinch over the canvas or use the toolbar buttons to zoom.
 - Use a two-finger trackpad gesture to pan. Space-drag remains available as a keyboard fallback, and **Fit diagram** resets the view.
-- Add editable notes with **Add note**. Select a note and press Delete to remove it.
+- Add editable notes with **Add note**. Notes support paragraph styles, emphasis, alignment, and text and background colors; new notes inherit the last touched note's style.
+- Draw and style arrows with independent endpoint heads. Selecting an arrow immediately exposes its movable endpoints.
+- Draw grouping frames behind the diagram, then edit their labels, colors, and border styles.
+- Relationship cardinalities use crow's-foot notation at table edges, with exact text retained for uncommon numeric ranges.
 - Use **Refresh schema** after a database migration to update columns and relationships. Existing table positions, selections, notes, and the current view are preserved; new tables start unselected.
 - Edit the diagram name, then use **Save** (or <kbd>⌘S</kbd>/<kbd>Ctrl-S</kbd>) to write the complete diagram into the Rails application as a normal `*.erd.png` image with its editable schema, layout, notes, selection, and viewport embedded inside it. Select a saved diagram from the menu to reopen it, or use **New** to start an “Untitled ERD.”
 
