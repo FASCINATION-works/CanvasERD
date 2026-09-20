@@ -33,6 +33,29 @@ class DiagramStoreTest < Minitest::Test
     end
   end
 
+  def test_finds_the_most_recently_modified_diagram
+    Dir.mktmpdir do |root|
+      store = CanvasERD::DiagramStore.new(root: root)
+      store.write("older.erd.png", editable_png)
+      store.write("newer.erd.png", editable_png)
+      older = File.join(root, "docs/erd/older.erd.png")
+      newer = File.join(root, "docs/erd/newer.erd.png")
+      File.utime(Time.at(100), Time.at(100), older)
+      File.utime(Time.at(200), Time.at(200), newer)
+
+      assert_equal "newer.erd.png", store.most_recent_name
+      assert_equal DOCUMENT, store.document("newer.erd.png")
+    end
+  end
+
+  def test_has_no_most_recent_diagram_when_the_store_is_empty
+    Dir.mktmpdir do |root|
+      store = CanvasERD::DiagramStore.new(root: root)
+
+      assert_nil store.most_recent_name
+    end
+  end
+
   def test_rejects_a_directory_outside_the_application
     Dir.mktmpdir do |root|
       error = assert_raises(CanvasERD::DiagramStore::Error) do

@@ -321,6 +321,214 @@ select:focus-visible {
   box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
 }
 
+.note-formatting,
+.table-formatting,
+.arrow-formatting,
+.frame-formatting {
+  position: absolute;
+  bottom: 4rem;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  max-width: calc(100% - 1.5rem);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.35rem;
+  transform: translateX(-50%);
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
+}
+
+.format-button {
+  width: 2.25rem;
+  padding: 0;
+}
+
+.format-button[aria-pressed="true"] {
+  border-color: #2563eb;
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.note-bold {
+  font-weight: 700;
+}
+
+.note-italic {
+  font-style: italic;
+}
+
+.note-underline {
+  text-decoration: underline;
+}
+
+.note-format-field {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  color: #526277;
+  padding: 0 0.35rem;
+  font-size: 0.72rem;
+}
+
+.color-control {
+  position: relative;
+}
+
+.note-color-button {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.72rem;
+}
+
+.color-preview {
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid rgba(15, 23, 42, 0.25);
+  border-radius: 0.25rem;
+  background: #ffffff;
+}
+
+.transparent-color {
+  background-color: #ffffff !important;
+  background-image:
+    linear-gradient(45deg, #cbd5e1 25%, transparent 25%),
+    linear-gradient(-45deg, #cbd5e1 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #cbd5e1 75%),
+    linear-gradient(-45deg, transparent 75%, #cbd5e1 75%);
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+  background-size: 10px 10px;
+}
+
+.mixed-color {
+  background-color: #ffffff !important;
+  background-image: linear-gradient(135deg, #243b63 50%, #9a3412 50%);
+}
+
+.color-menu {
+  position: absolute;
+  bottom: calc(100% + 0.55rem);
+  left: 50%;
+  width: 11.5rem;
+  border: 1px solid #cbd3df;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  padding: 0.55rem;
+  transform: translateX(-50%);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.16);
+}
+
+.color-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+
+.color-swatch {
+  width: 2.2rem;
+  min-height: 2.2rem;
+  border-color: rgba(15, 23, 42, 0.25);
+  padding: 0;
+}
+
+.color-swatch[aria-pressed="true"] {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.swatch-separator {
+  grid-column: 1 / -1;
+  height: 1px;
+  margin: 0.15rem 0;
+  background: #e2e8f0;
+}
+
+.color-menu-actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.55rem;
+}
+
+.transparent-option {
+  display: flex;
+  width: 2.25rem;
+  min-width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.transparent-option[aria-pressed="true"] {
+  border-color: #2563eb;
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.color-menu-actions .custom-color {
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  border: 1px solid #cbd3df;
+  border-radius: 0.45rem;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.68rem;
+}
+
+.custom-color {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+  border-top: 1px solid #e2e8f0;
+  color: #526277;
+  cursor: pointer;
+  padding-top: 0.55rem;
+  font-size: 0.75rem;
+}
+
+.custom-color input {
+  width: 2rem;
+  height: 1.65rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.note-format-field select {
+  min-height: 1.9rem;
+  border: 1px solid #cbd3df;
+  border-radius: 0.35rem;
+  color: #263447;
+  background: #ffffff;
+  padding: 0.2rem 0.35rem;
+}
+
+#arrow-stroke-width {
+  width: 4rem;
+  min-height: 1.9rem;
+  border: 1px solid #cbd3df;
+  border-radius: 0.35rem;
+  color: #263447;
+  background: #ffffff;
+  padding: 0.2rem 0.35rem;
+}
+
+#note-paragraph-style {
+  max-width: 7.5rem;
+}
+
 .canvas-panel .canvas-container {
   position: absolute !important;
   inset: 0;

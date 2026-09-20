@@ -49,7 +49,7 @@ class CLITest < Minitest::Test
     status = CanvasERD::CLI.start(["--version"], out: out, err: StringIO.new)
 
     assert_equal 0, status
-    assert_equal "CanvasERD 0.1.0\n", out.string
+    assert_equal "CanvasERD 0.2.0\n", out.string
   end
 
   def test_unknown_option_fails
@@ -81,6 +81,6 @@ class CLITest < Minitest::Test
     stdout, stderr, status = Open3.capture3(RbConfig.ruby, executable, "--version")
 
     assert status.success?, stderr
-    assert_equal "CanvasERD 0.1.0\n", stdout
+    assert_equal "CanvasERD 0.2.0\n", stdout
   end
 end

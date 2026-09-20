@@ -66,6 +66,13 @@
               <div><dt>New</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>N</kbd></dd></div>
               <div><dt>Save</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>S</kbd></dd></div>
               <div><dt>Add note at cursor</dt><dd><kbd>N</kbd></dd></div>
+              <div><dt>Bold note</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>B</kbd></dd></div>
+              <div><dt>Italic note</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>I</kbd></dd></div>
+              <div><dt>Underline note</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>U</kbd></dd></div>
+              <div><dt>Title style</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>Alt</kbd> <kbd>1</kbd></dd></div>
+              <div><dt>Heading style</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>Alt</kbd> <kbd>2</kbd></dd></div>
+              <div><dt>Paragraph style</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>Alt</kbd> <kbd>3</kbd></dd></div>
+              <div><dt>Code style</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>Alt</kbd> <kbd>4</kbd></dd></div>
               <div><dt>Arrow tool</dt><dd><kbd>A</kbd></dd></div>
               <div><dt>Free arrow endpoint</dt><dd><kbd>Ctrl</kbd></dd></div>
               <div><dt>Toggle tables</dt><dd><kbd>T</kbd></dd></div>
@@ -76,6 +83,148 @@
               <div><dt>Shortcut help</dt><dd><kbd>?</kbd></dd></div>
             </dl>
           </div>
+          <div id="note-formatting" class="note-formatting" role="toolbar" aria-label="Note formatting" hidden>
+            <button id="note-bold" class="format-button note-bold" type="button" aria-label="Bold" title="Bold (⌘/Ctrl-B)" aria-pressed="false">B</button>
+            <button id="note-italic" class="format-button note-italic" type="button" aria-label="Italic" title="Italic (⌘/Ctrl-I)" aria-pressed="false">I</button>
+            <button id="note-underline" class="format-button note-underline" type="button" aria-label="Underline" title="Underline (⌘/Ctrl-U)" aria-pressed="false">U</button>
+            <div class="color-control">
+              <button id="note-text-color-button" class="note-color-button" type="button" aria-label="Text color" title="Text color" aria-expanded="false">
+                <span id="note-text-color-preview" class="color-preview" aria-hidden="true"></span>
+                <span>Text</span>
+              </button>
+              <div id="note-text-color-menu" class="color-menu" hidden>
+                <div id="note-text-color-swatches" class="color-swatches" role="group" aria-label="Text color swatches"></div>
+                <label class="custom-color">
+                  <span>Custom…</span>
+                  <input id="note-text-custom-color" type="color" value="#374151" aria-label="Custom text color">
+                </label>
+              </div>
+            </div>
+            <div class="color-control">
+              <button id="note-background-color-button" class="note-color-button" type="button" aria-label="Background color" title="Background color" aria-expanded="false">
+                <span id="note-background-color-preview" class="color-preview" aria-hidden="true"></span>
+                <span>Fill</span>
+              </button>
+              <div id="note-background-color-menu" class="color-menu" hidden>
+                <div id="note-background-color-swatches" class="color-swatches" role="group" aria-label="Background color swatches"></div>
+                <div class="color-menu-actions">
+                  <button id="note-background-transparent" class="transparent-option" type="button" aria-label="Transparent background" aria-pressed="false">
+                    <span class="color-preview transparent-color" aria-hidden="true"></span>
+                  </button>
+                  <label class="custom-color">
+                    <span>Custom…</span>
+                    <input id="note-background-custom-color" type="color" value="#fff2a8" aria-label="Custom background color">
+                  </label>
+                </div>
+              </div>
+            </div>
+            <label class="note-format-field">
+              <span>Style</span>
+              <select id="note-paragraph-style" aria-label="Paragraph style">
+                <option value="title">Title</option>
+                <option value="heading">Heading</option>
+                <option value="paragraph" selected>Paragraph</option>
+                <option value="code">Code</option>
+              </select>
+            </label>
+            <label class="note-format-field">
+              <span>Align</span>
+              <select id="note-alignment" aria-label="Text alignment">
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </label>
+          </div>
+          <div id="table-formatting" class="table-formatting" role="toolbar" aria-label="Table formatting" hidden>
+            <div class="color-control">
+              <button id="table-header-color-button" class="note-color-button" type="button" aria-label="Table header color" title="Table header color" aria-expanded="false">
+                <span id="table-header-color-preview" class="color-preview" aria-hidden="true"></span>
+                <span>Header</span>
+              </button>
+              <div id="table-header-color-menu" class="color-menu" hidden>
+                <div id="table-header-color-swatches" class="color-swatches" role="group" aria-label="Table header color swatches"></div>
+                <label class="custom-color">
+                  <span>Custom…</span>
+                  <input id="table-header-custom-color" type="color" value="#243b63" aria-label="Custom table header color">
+                </label>
+              </div>
+            </div>
+          </div>
+          <div id="arrow-formatting" class="arrow-formatting" role="toolbar" aria-label="Arrow formatting" hidden>
+            <div class="color-control">
+              <button id="arrow-color-button" class="note-color-button" type="button" aria-label="Arrow color" title="Arrow color" aria-expanded="false">
+                <span id="arrow-color-preview" class="color-preview" aria-hidden="true"></span>
+                <span>Color</span>
+              </button>
+              <div id="arrow-color-menu" class="color-menu" hidden>
+                <div id="arrow-color-swatches" class="color-swatches" role="group" aria-label="Arrow color swatches"></div>
+                <label class="custom-color">
+                  <span>Custom…</span>
+                  <input id="arrow-custom-color" type="color" value="#243b63" aria-label="Custom arrow color">
+                </label>
+              </div>
+            </div>
+            <label class="note-format-field">
+              <span>Start</span>
+              <select id="arrow-start-head" aria-label="Start arrowhead">
+                <option value="none" selected>None</option>
+                <option value="open">Arrow — open</option>
+                <option value="filled">Arrow — closed</option>
+                <option value="circle-open">Circle — open</option>
+                <option value="circle">Circle — closed</option>
+                <option value="diamond-open">Diamond — open</option>
+                <option value="diamond">Diamond — closed</option>
+              </select>
+            </label>
+            <label class="note-format-field">
+              <span>End</span>
+              <select id="arrow-end-head" aria-label="End arrowhead">
+                <option value="none">None</option>
+                <option value="open">Arrow — open</option>
+                <option value="filled" selected>Arrow — closed</option>
+                <option value="circle-open">Circle — open</option>
+                <option value="circle">Circle — closed</option>
+                <option value="diamond-open">Diamond — open</option>
+                <option value="diamond">Diamond — closed</option>
+              </select>
+            </label>
+            <label class="note-format-field">
+              <span>Line</span>
+              <select id="arrow-line-style" aria-label="Arrow line style">
+                <option value="solid" selected>Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+              </select>
+            </label>
+            <label class="note-format-field">
+              <span>Width</span>
+              <input id="arrow-stroke-width" type="number" min="0.5" max="20" step="0.25" value="2.25" aria-label="Arrow line width">
+            </label>
+          </div>
+          <div id="frame-formatting" class="frame-formatting" role="toolbar" aria-label="Frame formatting" hidden>
+            <div class="color-control">
+              <button id="frame-color-button" class="note-color-button" type="button" aria-label="Frame color" title="Frame color" aria-expanded="false">
+                <span id="frame-color-preview" class="color-preview" aria-hidden="true"></span>
+                <span>Color</span>
+              </button>
+              <div id="frame-color-menu" class="color-menu" hidden>
+                <div id="frame-color-swatches" class="color-swatches" role="group" aria-label="Frame color swatches"></div>
+                <label class="custom-color">
+                  <span>Custom…</span>
+                  <input id="frame-custom-color" type="color" value="#243b63" aria-label="Custom frame color">
+                </label>
+              </div>
+            </div>
+            <label class="note-format-field">
+              <span>Border</span>
+              <select id="frame-line-style" aria-label="Frame border style">
+                <option value="solid" selected>Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+              </select>
+            </label>
+          </div>
           <div class="canvas-tools" aria-label="Canvas tools">
             <button id="toggle-tables" class="icon-button" type="button" aria-label="Show tables" title="Show tables (T)" aria-expanded="false">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M3 20.4V3.6C3 3.26863 3.26863 3 3.6 3H20.4C20.7314 3 21 3.26863 21 3.6V20.4C21 20.7314 20.7314 21 20.4 21H3.6C3.26863 21 3 20.7314 3 20.4Z" stroke="#000000" stroke-width="1.5"></path><path d="M3 16.5H21" stroke="#000000" stroke-width="1.5"></path><path d="M3 12H21" stroke="#000000" stroke-width="1.5"></path><path d="M21 7.5H3" stroke="#000000" stroke-width="1.5"></path><path d="M12 21V3" stroke="#000000" stroke-width="1.5"></path></svg>
@@ -83,10 +232,13 @@
             <button id="layout-tables" class="icon-button" type="button" aria-label="Layout tables" title="Layout tables (L)" aria-expanded="false">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M21 3.6V12H12V3H20.4C20.7314 3 21 3.26863 21 3.6Z" stroke="#000000" stroke-width="1.5"></path><path d="M21 20.4V12H12V21H20.4C20.7314 21 21 20.7314 21 20.4Z" stroke="#000000" stroke-width="1.5"></path><path d="M3 12V3.6C3 3.26863 3.26863 3 3.6 3H12V12H3Z" stroke="#000000" stroke-width="1.5"></path><path d="M3 12V20.4C3 20.7314 3.26863 21 3.6 21H12V12H3Z" stroke="#000000" stroke-width="1.5"></path></svg>
             </button>
+            <button id="add-frame" class="icon-button" type="button" aria-label="Frame tool" title="Frame tool" aria-pressed="false">
+              <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="1" stroke="#000000" stroke-width="1.5" stroke-dasharray="3 2"></rect><path d="M6 8H12" stroke="#000000" stroke-width="1.5" stroke-linecap="round"></path></svg>
+            </button>
             <button id="add-note" class="icon-button" type="button" aria-label="Add note" title="Add note (N)">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M12 8L12 16M12 8H8M12 8H16" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M21 13.5V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V13.5M21 10.5V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5V10.5" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"></path><path d="M19.5 13.5V10.5H22.5V13.5H19.5Z" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"></path><path d="M1.5 13.5V10.5H4.5V13.5H1.5Z" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"></path></svg>
             </button>
-            <button id="add-arrow" class="icon-button" type="button" aria-label="Arrow tool" title="Arrow tool (A) · Double-click an arrow to edit endpoints · Hold Ctrl for a free endpoint" aria-pressed="false">
+            <button id="add-arrow" class="icon-button" type="button" aria-label="Arrow tool" title="Arrow tool (A) · Select an arrow to edit endpoints · Hold Ctrl for a free endpoint" aria-pressed="false">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M6.00005 19L19 5.99996M19 5.99996V18.48M19 5.99996H6.52005" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
           </div>
