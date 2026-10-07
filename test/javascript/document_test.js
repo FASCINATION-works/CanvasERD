@@ -336,6 +336,8 @@ test("maps editor keyboard shortcuts to actions", () => {
   assert.equal(documentModel.shortcutAction({ key: "o", metaKey: true }), "open");
   assert.equal(documentModel.shortcutAction({ key: "n", ctrlKey: true }), "new");
   assert.equal(documentModel.shortcutAction({ key: "n" }), "addNote");
+  assert.equal(documentModel.shortcutAction({ key: "c" }), "addCode");
+  assert.equal(documentModel.shortcutAction({ key: "c", metaKey: true }), null);
   assert.equal(documentModel.shortcutAction({ key: "a" }), "arrow");
   assert.equal(documentModel.shortcutAction({ key: "t" }), "toggleTables");
   assert.equal(documentModel.shortcutAction({ key: "l" }), "layoutTables");
@@ -370,6 +372,114 @@ test("attaches arrow endpoints to tables and notes", () => {
     { type: "note", id: "note-1" }
   );
   assert.equal(documentModel.arrowAttachment({ canvasErdType: "arrow" }), null);
+});
+
+test("attaches arrow endpoints to code blocks", () => {
+  assert.deepEqual(
+    documentModel.arrowAttachment({ canvasErdType: "code", codeBlockId: "code-1" }),
+    { type: "code", id: "code-1" }
+  );
+  assert.equal(documentModel.canvasLayer("code"), documentModel.canvasLayer("note"));
+});
+
+test("maps highlighted runs, including multi-line tokens, to per-character styles", () => {
+  const keyword = { fill: "#cf222e", fontWeight: "bold" };
+  const comment = { fill: "#6e7781" };
+  const styles = documentModel.codeTokenStyles([
+    ["def", keyword],
+    [" x\n", {}],
+    ["=begin\nhi\n=end", comment]
+  ]);
+
+  assert.deepEqual(styles[0][2], keyword);
+  assert.notEqual(styles[0][2], keyword);
+  assert.deepEqual(styles[0][4], {});
+  assert.deepEqual(styles[1][0], comment);
+  assert.deepEqual(Object.keys(styles[2]), ["0", "1"]);
+  assert.deepEqual(styles[3][3], comment);
+});
+
+test("restores and saves code block geometry and text", () => {
+  const block = { x: 10, y: 20, width: 300, angle: 5, code: "x" };
+
+  assert.deepEqual(documentModel.codeCanvasGeometry(block), {
+    left: 10,
+    top: 20,
+    width: 300,
+    angle: 5,
+    fontFamily: "Courier New",
+    fontSize: 14,
+    lineHeight: 1.2
+  });
+  assert.equal(documentModel.codeCanvasGeometry({ ...block, size: "large" }).fontSize, 18);
+  assert.equal(documentModel.codeFontSize({ size: "small" }), 12);
+  assert.equal(documentModel.codeFontSize({ size: "huge" }), 14);
+  assert.deepEqual(
+    documentModel.codeStateGeometry({ left: 1, top: 2, width: 100, scaleX: 2, angle: 0, text: "y" }),
+    { x: 1, y: 2, width: 200, angle: 0, code: "y" }
+  );
+});
+
+test("builds and labels source file references", () => {
+  assert.deepEqual(
+    documentModel.sourceFromFields(" app/models/book.rb ", "10", "25"),
+    { path: "app/models/book.rb", startLine: 10, endLine: 25 }
+  );
+  assert.deepEqual(
+    documentModel.sourceFromFields("app/models/book.rb", "", "0"),
+    { path: "app/models/book.rb", startLine: null, endLine: null }
+  );
+  assert.equal(documentModel.sourceFromFields("  ", "1", "2"), null);
+  assert.equal(documentModel.sourceReferenceLabel({ path: "a.rb", startLine: 10, endLine: null }), "a.rb:10-end");
+  assert.equal(documentModel.sourceReferenceLabel({ path: "a.rb", startLine: null, endLine: 5 }), "a.rb:1-5");
+  assert.equal(
+    documentModel.sourceReferenceLabel({ path: "a.rb", startLine: 10, endLine: 25 }),
+    "a.rb:10-25"
+  );
+  assert.equal(documentModel.sourceReferenceLabel({ path: "a.rb", startLine: 7, endLine: 7 }), "a.rb:7");
+  assert.equal(documentModel.sourceReferenceLabel({ path: "a.rb", startLine: null, endLine: null }), "a.rb");
+});
+
+test("numbers code lines from their source and sizes the gutter", () => {
+  assert.deepEqual(documentModel.codeLineLabels({ source: null }, 3), [1, 2, 3]);
+  assert.deepEqual(documentModel.codeLineLabels({ source: { path: "a.rb", startLine: 98 } }, 3), [98, 99, 100]);
+  assert.deepEqual(
+    documentModel.codeLineLabels({ source: { model: "Book" }, lineNumbers: [null, 3, 4] }, 4),
+    [null, 3, 4, null]
+  );
+  assert.deepEqual(documentModel.codeLineLabels({ source: { model: "Book" } }, 2), [null, null]);
+  assert.equal(documentModel.codeGutterWidth([98, 99, 100], 10), 30);
+  assert.equal(documentModel.codeGutterWidth([null], 10), 18);
+});
+
+test("finds the clicked code row and toggles highlighted lines", () => {
+  assert.equal(documentModel.codeRowAt([10, 20, 10], 0), 0);
+  assert.equal(documentModel.codeRowAt([10, 20, 10], 29.9), 1);
+  assert.equal(documentModel.codeRowAt([10, 20, 10], 40), -1);
+  assert.equal(documentModel.codeRowAt([10, 20, 10], -1), -1);
+  assert.deepEqual(documentModel.toggleHighlightedLine(undefined, 34), [34]);
+  assert.deepEqual(documentModel.toggleHighlightedLine([34, 40], 36), [34, 36, 40]);
+  assert.deepEqual(documentModel.toggleHighlightedLine([34, 36, 40], 36), [34, 40]);
+});
+
+test("applies the anchor line's highlight state to every labelled line in the range", () => {
+  const labels = [null, 3, 4, null, 9, 10];
+  assert.deepEqual(documentModel.highlightLineRange([1, 10], labels, 10, 4), [1, 4, 9, 10]);
+  assert.deepEqual(documentModel.highlightLineRange([3, 4, 9], labels, 10, 4), [3]);
+  assert.deepEqual(documentModel.highlightLineRange([], labels, 99, 9), [9]);
+});
+
+test("finds, places, and labels model detail code blocks", () => {
+  const scopes = { id: "code-1", source: { model: "Book", detail: "scopes" } };
+  const codeBlocks = [{ id: "code-0", source: null }, { id: "code-2", source: { path: "a.rb" } }, scopes];
+
+  assert.equal(documentModel.modelDetailBlock(codeBlocks, "Book", "scopes"), scopes);
+  assert.equal(documentModel.modelDetailBlock(codeBlocks, "Author", "scopes"), null);
+  assert.deepEqual(
+    documentModel.modelDetailOrigin({ x: 10, y: 20 }),
+    { x: 10 + documentModel.CARD_WIDTH + 80, y: 20 }
+  );
+  assert.equal(documentModel.sourceReferenceLabel(scopes.source), "Book scopes");
 });
 
 test("opens endpoint editing when an arrow is selected", () => {
@@ -439,6 +549,7 @@ test("removing and restoring an entity preserves its position", () => {
   assert.equal(restored.includedEntityIds.includes("Book"), true);
   assert.equal(restored.positions, original.positions);
   assert.deepEqual(original.frames, []);
+  assert.deepEqual(original.codeBlocks, []);
 });
 
 test("finds tables in single and multiple selections", () => {
@@ -515,6 +626,15 @@ test("reconciles schema changes without losing diagram edits", () => {
       lineStyle: "dotted"
     }],
     notes: [{ id: "note-1", text: "Keep me", x: 5, y: 6, width: 200 }],
+    codeBlocks: [{
+      id: "code-1",
+      code: "class Book",
+      language: "ruby",
+      x: 7,
+      y: 8,
+      width: 300,
+      source: { path: "app/models/book.rb", startLine: 1, endLine: 1 }
+    }],
     arrows: [{
       id: "arrow-1",
       start: { x: 1, y: 2, attachment: { type: "entity", id: "Author", x: 1, y: 0.5 } },
@@ -540,6 +660,8 @@ test("reconciles schema changes without losing diagram edits", () => {
   assert.ok(result.state.positions.Review.y > 400 + documentModel.tableHeight(nextSchema.entities[0]));
   assert.deepEqual(result.state.notes, state.notes);
   assert.notEqual(result.state.notes, state.notes);
+  assert.deepEqual(result.state.codeBlocks, state.codeBlocks);
+  assert.notEqual(result.state.codeBlocks[0].source, state.codeBlocks[0].source);
   assert.deepEqual(result.state.arrows, state.arrows);
   assert.notEqual(result.state.arrows, state.arrows);
   assert.notEqual(result.state.arrows[0].start, state.arrows[0].start);

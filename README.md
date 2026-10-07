@@ -15,7 +15,7 @@ group :development do
 end
 ```
 
-Then run `bundle install`. CanvasERD requires Ruby 3.1 or newer, Active Record 7.0 or newer, and a Rack server available in the Rails bundle.
+Then run `bundle install`. CanvasERD requires Ruby 3.3 or newer, Active Record 7.0 or newer, and a Rack server available in the Rails bundle.
 
 ## Usage
 
@@ -41,11 +41,13 @@ The editor opens the most recently modified saved diagram when it starts. Its sa
 
 - Drag tables to reposition them.
 - Use the table sidebar to add or remove tables without losing their positions.
+- Toggle **scopes** in the table sidebar to show a model's scope source in a code box linked to its table. Only scopes declared in the Rails application (including its concerns) are shown.
 - Select one or more tables to color their headers and visually group related tables.
 - Use **Layout tables** to rearrange the tables currently on the canvas with ELK without moving notes or hidden tables.
 - Pinch over the canvas or use the toolbar buttons to zoom.
 - Use a two-finger trackpad gesture to pan. Space-drag remains available as a keyboard fallback, and **Fit diagram** resets the view.
 - Add editable notes with **Add note**. Notes support paragraph styles, emphasis, alignment, and text and background colors; new notes inherit the last touched note's style.
+- Add syntax-highlighted code boxes with **Add code**, choosing the language and a small, medium, or large font from the formatting toolbar. **Add source file** shows a read-only snippet of a file in the Rails application, with path autocompletion from the application's files (respecting `.gitignore`) and optional start and end lines. Select the snippet to change its path or lines from the toolbar, or to toggle line numbers (which follow the source file). Click line numbers to highlight lines, and Shift-click to highlight or clear a range to match the last line clicked; **Refresh schema** re-reads it. Highlighting uses [Rouge](https://github.com/rouge-ruby/rouge).
 - Draw and style arrows with independent endpoint heads. Selecting an arrow immediately exposes its movable endpoints.
 - Draw grouping frames behind the diagram, then edit their labels, colors, and border styles.
 - Relationship cardinalities use crow's-foot notation at table edges, with exact text retained for uncommon numeric ranges.

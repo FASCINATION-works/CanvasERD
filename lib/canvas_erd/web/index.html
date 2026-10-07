@@ -66,6 +66,7 @@
               <div><dt>New</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>N</kbd></dd></div>
               <div><dt>Save</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>S</kbd></dd></div>
               <div><dt>Add note at cursor</dt><dd><kbd>N</kbd></dd></div>
+              <div><dt>Add code at cursor</dt><dd><kbd>C</kbd></dd></div>
               <div><dt>Bold note</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>B</kbd></dd></div>
               <div><dt>Italic note</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>I</kbd></dd></div>
               <div><dt>Underline note</dt><dd><kbd>⌘/Ctrl</kbd> <kbd>U</kbd></dd></div>
@@ -225,6 +226,61 @@
               </select>
             </label>
           </div>
+          <div id="code-formatting" class="code-formatting" role="toolbar" aria-label="Code formatting" hidden>
+            <label class="note-format-field">
+              <span>Language</span>
+              <select id="code-language" aria-label="Code language"></select>
+            </label>
+            <label class="note-format-field">
+              <span>Size</span>
+              <select id="code-size" aria-label="Code font size">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+              </select>
+            </label>
+            <button id="code-line-numbers"class="format-button" type="button" aria-label="Line numbers" title="Line numbers" aria-pressed="false">#</button>
+            <span id="code-source" class="code-source" hidden></span>
+            <div id="code-source-fields" class="code-source-fields" hidden>
+              <label class="note-format-field">
+                <span>Path</span>
+                <input id="code-source-path" class="source-path-input" type="text" list="source-file-paths" autocomplete="off" aria-label="Source file path">
+              </label>
+              <label class="note-format-field">
+                <span>Lines</span>
+                <input id="code-source-start" class="line-input" type="number" min="1" placeholder="1" aria-label="Start line">
+              </label>
+              <label class="note-format-field">
+                <span>to</span>
+                <input id="code-source-end" class="line-input" type="number" min="1" placeholder="end" aria-label="End line">
+              </label>
+            </div>
+          </div>
+          <datalist id="source-file-paths"></datalist>
+          <dialog id="source-dialog" class="source-dialog" aria-labelledby="source-dialog-title">
+            <form id="source-form">
+              <h2 id="source-dialog-title">Add source file</h2>
+              <label class="source-field">
+                <span>Path</span>
+                <input id="source-path" class="source-path-input" type="text" list="source-file-paths" autocomplete="off" placeholder="app/models/book.rb" required>
+              </label>
+              <div class="source-lines">
+                <label class="source-field">
+                  <span>Start line</span>
+                  <input id="source-start" class="line-input" type="number" min="1" placeholder="1">
+                </label>
+                <label class="source-field">
+                  <span>End line</span>
+                  <input id="source-end" class="line-input" type="number" min="1" placeholder="end">
+                </label>
+              </div>
+              <p id="source-error" class="source-error" role="alert" hidden></p>
+              <div class="source-actions">
+                <button id="source-cancel" type="button">Cancel</button>
+                <button id="source-submit" type="submit">Add</button>
+              </div>
+            </form>
+          </dialog>
           <div class="canvas-tools" aria-label="Canvas tools">
             <button id="toggle-tables" class="icon-button" type="button" aria-label="Show tables" title="Show tables (T)" aria-expanded="false">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M3 20.4V3.6C3 3.26863 3.26863 3 3.6 3H20.4C20.7314 3 21 3.26863 21 3.6V20.4C21 20.7314 20.7314 21 20.4 21H3.6C3.26863 21 3 20.7314 3 20.4Z" stroke="#000000" stroke-width="1.5"></path><path d="M3 16.5H21" stroke="#000000" stroke-width="1.5"></path><path d="M3 12H21" stroke="#000000" stroke-width="1.5"></path><path d="M21 7.5H3" stroke="#000000" stroke-width="1.5"></path><path d="M12 21V3" stroke="#000000" stroke-width="1.5"></path></svg>
@@ -237,6 +293,12 @@
             </button>
             <button id="add-note" class="icon-button" type="button" aria-label="Add note" title="Add note (N)">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M12 8L12 16M12 8H8M12 8H16" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M21 13.5V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V13.5M21 10.5V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5V10.5" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"></path><path d="M19.5 13.5V10.5H22.5V13.5H19.5Z" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"></path><path d="M1.5 13.5V10.5H4.5V13.5H1.5Z" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"></path></svg>
+            </button>
+            <button id="add-code" class="icon-button" type="button" aria-label="Add code" title="Add code (C)">
+              <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M13.5 6L10 18.5" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.5 8.5L3 12L6.5 15.5" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17.5 8.5L21 12L17.5 15.5" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <button id="add-source" class="icon-button" type="button" aria-label="Add source file" title="Add source file">
+              <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M4 21.4V2.6C4 2.26863 4.26863 2 4.6 2H16.2515C16.4106 2 16.5632 2.06321 16.6757 2.17574L19.8243 5.32426C19.9368 5.43679 20 5.5894 20 5.74853V21.4C20 21.7314 19.7314 22 19.4 22H4.6C4.26863 22 4 21.7314 4 21.4Z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 10L16 10" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 18L16 18" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 14L12 14" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 2V5.4C16 5.73137 16.2686 6 16.6 6H20" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             </button>
             <button id="add-arrow" class="icon-button" type="button" aria-label="Arrow tool" title="Arrow tool (A) · Select an arrow to edit endpoints · Hold Ctrl for a free endpoint" aria-pressed="false">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" color="#000000" aria-hidden="true" focusable="false"><path d="M6.00005 19L19 5.99996M19 5.99996V18.48M19 5.99996H6.52005" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>

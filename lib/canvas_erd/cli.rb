@@ -72,6 +72,7 @@ module CanvasERD
       end
 
       @err.puts "Loading Rails application from #{@root}..."
+      ModelDetails.install
       ApplicationLoader.new(@root).load
 
       schema_provider = SchemaProvider.new
@@ -87,7 +88,9 @@ module CanvasERD
         schema: schema,
         schema_provider: schema_provider,
         state: state,
-        diagram_store: diagram_store
+        diagram_store: diagram_store,
+        source_files: SourceFiles.new(root: @root),
+        model_details: ModelDetails.new(root: @root)
       )
       server = Server.new(app: app)
 

@@ -39,6 +39,12 @@ class ServerTest < Minitest::Test
     assert_includes response.body, 'class="canvas-tools"'
     assert_includes response.body, 'title="Add note (N)"'
     assert_includes response.body, 'id="add-arrow"'
+    assert_includes response.body, 'title="Add code (C)"'
+    assert_includes response.body, "Add code at cursor"
+    assert_includes response.body, 'id="add-source"'
+    assert_includes response.body, 'id="code-formatting"'
+    assert_includes response.body, 'id="source-dialog"'
+    assert_includes response.body, 'list="source-file-paths"'
     assert_includes response.body, "Arrow tool (A)"
     assert_includes response.body, "Free arrow endpoint"
     assert_includes response.body, 'title="Show tables (T)"'
@@ -186,6 +192,51 @@ class ServerTest < Minitest::Test
       assert_equal 400, response.status
       assert_includes response.body, ".erd.png"
       assert_includes response["content-security-policy"], "default-src 'self'"
+    end
+  end
+
+  def test_serves_highlighting_languages_and_highlights_code
+    languages = JSON.parse(@request.get("/api/highlighting").body)
+    highlighted = @request.post("/api/highlight", input: JSON.generate("code" => "def x; end", "language" => "ruby"))
+    invalid = @request.post("/api/highlight", input: "nope")
+
+    assert_includes languages.fetch("languages"), { "tag" => "ruby", "title" => "Ruby" }
+    assert_equal 200, highlighted.status
+    assert_equal "def x; end", JSON.parse(highlighted.body)["runs"].map(&:first).join
+    assert_equal 400, invalid.status
+    assert_equal "POST", @request.get("/api/highlight")["allow"]
+  end
+
+  def test_serves_application_source_files
+    Dir.mktmpdir do |root|
+      File.write(File.join(root, "book.rb"), "class Book\nend\n")
+      app = CanvasERD::WebApplication.new(schema: SCHEMA, source_files: CanvasERD::SourceFiles.new(root: root))
+      request = Rack::MockRequest.new(app)
+
+      source = request.get("/api/source?path=book.rb&start=1&end=1")
+
+      assert_equal({ "path" => "book.rb", "code" => "class Book", "language" => "ruby" }, JSON.parse(source.body))
+      assert_equal({ "paths" => ["book.rb"] }, JSON.parse(request.get("/api/source_files").body))
+      assert_equal 404, request.get("/api/source?path=missing.rb").status
+      assert_equal 400, request.get("/api/source?path=#{__FILE__}").status
+      assert_equal 400, request.get("/api/source?path=book.rb&start=x").status
+    end
+  end
+
+  def test_serves_model_details
+    Dir.mktmpdir do |root|
+      File.write(File.join(root, "book.rb"), "scope :recent, -> { order(:id) }\n")
+      scopes = { "Book" => [{ name: "recent", path: File.join(File.realpath(root), "book.rb"), line: 1 }] }
+      details = CanvasERD::ModelDetails.new(root: root, scopes: scopes, source_path: ->(_model) {})
+      request = Rack::MockRequest.new(CanvasERD::WebApplication.new(schema: SCHEMA, model_details: details))
+
+      assert_equal({ "Book" => { "scopes" => 1 } }, JSON.parse(request.get("/api/model_details").body))
+      assert_equal(
+        { "code" => "# book.rb\nscope :recent, -> { order(:id) }", "language" => "ruby", "lineNumbers" => [nil, 1] },
+        JSON.parse(request.get("/api/model_detail?model=Book&detail=scopes").body)
+      )
+      assert_equal 404, request.get("/api/model_detail?model=Author&detail=scopes").status
+      assert_equal({}, JSON.parse(@request.get("/api/model_details").body))
     end
   end
 
