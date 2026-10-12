@@ -57,6 +57,7 @@ class PackageTest < Minitest::Test
 
     assert_equal "~> 2.1", dependencies.fetch("rails-erd")
     assert_equal ">= 2.2, < 4", dependencies.fetch("rack")
+    assert_equal ">= 4.0, < 6", dependencies.fetch("rouge")
     refute dependencies.key?("webrick")
   end
 

@@ -21,10 +21,14 @@ module CanvasERD
 
     attr_reader :schema
 
-    def initialize(schema:, schema_provider: nil, state: nil, diagram_store: nil)
+    def initialize(schema:, schema_provider: nil, state: nil, diagram_store: nil, source_files: nil,
+      model_details: nil, highlighter: Highlighter.new)
       @schema = schema
       @schema_provider = schema_provider || -> { schema }
       @diagram_store = diagram_store
+      @source_files = source_files
+      @model_details = model_details
+      @highlighter = highlighter
       @schema_mutex = Mutex.new
       @document = {
         "format" => "canvas_erd",
@@ -42,10 +46,10 @@ module CanvasERD
 
       body = [] if method == "HEAD"
       [status, security_headers.merge(headers), body]
-    rescue DiagramStore::NotFound => error
+    rescue DiagramStore::NotFound, SourceFiles::NotFound, ModelDetails::NotFound => error
       status, headers, body = response(404, "text/plain; charset=utf-8", error.message)
       [status, security_headers.merge(headers), method == "HEAD" ? [] : body]
-    rescue DiagramStore::Error => error
+    rescue DiagramStore::Error, SourceFiles::Error => error
       status, headers, body = response(400, "text/plain; charset=utf-8", error.message)
       [status, security_headers.merge(headers), method == "HEAD" ? [] : body]
     end
@@ -59,6 +63,12 @@ module CanvasERD
         return diagram_response(environment, write: method == "PUT")
       end
 
+      if path == "/api/highlight"
+        return method_not_allowed("POST") unless method == "POST"
+
+        return highlight_response(environment)
+      end
+
       return method_not_allowed("GET, HEAD") unless %w[GET HEAD].include?(method)
 
       if path == "/api/schema"
@@ -67,6 +77,16 @@ module CanvasERD
         document_response
       elsif path == "/api/diagrams"
         diagrams_response
+      elsif path == "/api/highlighting"
+        json_response(@highlighter.colors.merge("languages" => @highlighter.languages))
+      elsif path == "/api/source_files"
+        source_files_response
+      elsif path == "/api/source"
+        source_response(environment)
+      elsif path == "/api/model_details"
+        json_response(@model_details ? @model_details.summary : {})
+      elsif path == "/api/model_detail"
+        model_detail_response(environment)
       elsif STATIC_FILES.key?(path)
         file_response(*STATIC_FILES.fetch(path))
       else
@@ -137,6 +157,52 @@ module CanvasERD
           "cache-control" => "no-store"
         )
       end
+    end
+
+    def highlight_response(environment)
+      request = JSON.parse(environment.fetch("rack.input").read)
+      raise JSON::ParserError, "expected an object" unless request.is_a?(Hash)
+
+      json_response(@highlighter.highlight(request["code"], request["language"]))
+    rescue JSON::ParserError
+      response(400, "text/plain; charset=utf-8", "Invalid highlight request")
+    end
+
+    def source_response(environment)
+      return response(404, "text/plain; charset=utf-8", "Source files are not configured") unless @source_files
+
+      query = Rack::Utils.parse_query(environment.fetch("QUERY_STRING", ""))
+      path = query["path"]
+      code = @source_files.read(path, start_line: line_number(query["start"]), end_line: line_number(query["end"]))
+      json_response(
+        "path" => path,
+        "code" => @highlighter.normalize(code),
+        "language" => @highlighter.language_for(path)
+      )
+    end
+
+    def source_files_response
+      return response(404, "text/plain; charset=utf-8", "Source files are not configured") unless @source_files
+
+      json_response("paths" => @source_files.paths)
+    end
+
+    def model_detail_response(environment)
+      return response(404, "text/plain; charset=utf-8", "Model details are not configured") unless @model_details
+
+      query = Rack::Utils.parse_query(environment.fetch("QUERY_STRING", ""))
+      json_response(@model_details.detail(query["model"], query["detail"]))
+    end
+
+    def line_number(value)
+      return nil if value.nil? || value.empty?
+      raise SourceFiles::Error, "Invalid line number: #{value}" unless value.match?(/\A\d+\z/)
+
+      value.to_i
+    end
+
+    def json_response(data)
+      response(200, "application/json; charset=utf-8", JSON.generate(data), "cache-control" => "no-store")
     end
 
     def file_response(relative_path, content_type)

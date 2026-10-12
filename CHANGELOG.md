@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 - 2026-10-12
+
+- Add syntax-highlighted code boxes with a selectable language and small, medium, or large font, highlighted with Rouge.
+- Add read-only source file snippets from the Rails application, with `.gitignore`-aware path autocompletion, optional start and end lines, toggleable line numbers, and clickable line highlighting; **Refresh schema** re-reads them.
+- Toggle a model's scopes from the table sidebar to show their source in a code box linked to its table, limited to scopes declared in the Rails application and its concerns.
+- Require Ruby 3.3 or newer.
+
 ## 0.2.0 - 2026-09-19
 
 - Format whole notes with paragraph styles, bold, italic, underline, alignment, text and background colors, and keyboard shortcuts for styles and emphasis.

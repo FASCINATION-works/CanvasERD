@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = "A local browser-based editor for diagrams generated from Rails ERD domain models."
   spec.homepage = "https://github.com/FASCINATION-works/CanvasERD"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.1"
+  spec.required_ruby_version = ">= 3.3"
 
   spec.files = Dir[
     "exe/*",
@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rails-erd", "~> 2.1"
   spec.add_dependency "rack", ">= 2.2", "< 4"
+  spec.add_dependency "rouge", ">= 4.0", "< 6"
 
   spec.add_development_dependency "minitest", "~> 5.20"
   spec.add_development_dependency "rake", "~> 13.0"
